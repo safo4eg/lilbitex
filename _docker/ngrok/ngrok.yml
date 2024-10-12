@@ -1,0 +1,11 @@
+version: 3
+
+agent:
+  authtoken: 2nKCSb2GhUzCqs6LWiCUc8cj0M5_2q7oP6StXvmW7xPG86YEV
+  api_key: 2nKC20cHZG3WJmTGaDXEHzSqVEI_56ctNTVovb27M71bEZDrr
+
+endpoints:
+  - name: lilbit
+    url: https://snail-resolved-mutt.ngrok-free.app
+    upstream:
+      url: nginx:80
