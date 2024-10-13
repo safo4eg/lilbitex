@@ -10,8 +10,8 @@ return [
     // Кастомные настройки какие-то
     'config' => [
         'groups' => [
-            env('MANAGER_CHAT_ID') => \App\Enums\GroupsEnum::MANAGER->value
-        ],
+            \App\Enums\GroupsEnum::MANAGER->value => (int) env('MANAGER_CHAT_ID')
+        ]
     ],
 
     // Set if the service provider should automatically load
