@@ -6,6 +6,7 @@ use \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeAllGroupChats;
 use \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeAllPrivateChats;
 use \App\Telegram\Middleware\EnsureUserChat;
 use \App\Telegram\Middleware\EnsureManagerChat;
+use App\Telegram\Commands\User\StartCommand;
 
 // обработка групповых чатов
 $bot->group(function (Nutgram $bot) {
@@ -16,7 +17,5 @@ $bot->group(function (Nutgram $bot) {
 
 // обработка приватных чатов
 $bot->group(function (Nutgram $bot) {
-    $bot->onCommand('start', function (Nutgram $bot) {
-        return $bot->sendMessage('Hello, world!');
-    })->description('The start command!');
+    $bot->registerCommand(StartCommand::class);
 })->middleware(EnsureUserChat::class);
