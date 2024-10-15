@@ -7,6 +7,7 @@ use \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeAllPrivateChats;
 use \App\Telegram\Middleware\EnsureUserChat;
 use \App\Telegram\Middleware\EnsureManagerChat;
 use App\Telegram\Commands\User\StartCommand;
+use \App\Telegram\Conversations;
 
 // обработка групповых чатов
 $bot->group(function (Nutgram $bot) {
@@ -18,4 +19,5 @@ $bot->group(function (Nutgram $bot) {
 // обработка приватных чатов
 $bot->group(function (Nutgram $bot) {
     $bot->registerCommand(StartCommand::class);
+    $bot->onText(__('commands.start.menu.buy_btc'), Conversations\Order\Buy\BTCConversation::class);
 })->middleware(EnsureUserChat::class);
