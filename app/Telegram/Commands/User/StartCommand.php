@@ -21,10 +21,10 @@ class StartCommand extends Command
                 resize_keyboard: true,
                 one_time_keyboard: false,
             )
-                ->addRow(KeyboardButton::make('Купить BTC'))
+                ->addRow(KeyboardButton::make(__('commands.start.menu.buy_btc')))
                 ->addRow(
-                    KeyboardButton::make('Профиль'),
-                    KeyboardButton::make('Инфо')
+                    KeyboardButton::make(__('commands.start.menu.profile')),
+                    KeyboardButton::make(__('commands.start.menu.info'))
                 )
         );
     }
