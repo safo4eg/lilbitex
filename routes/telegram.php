@@ -8,6 +8,10 @@ use \App\Telegram\Middleware\EnsureUserChat;
 use \App\Telegram\Middleware\EnsureManagerChat;
 use App\Telegram\Commands\User\StartCommand;
 use \App\Telegram\Conversations;
+use \App\Telegram\Middleware\CleanBotHistory;
+
+// глобальные middleware
+$bot->middleware(CleanBotHistory::class);
 
 // обработка групповых чатов
 $bot->group(function (Nutgram $bot) {
@@ -19,5 +23,5 @@ $bot->group(function (Nutgram $bot) {
 // обработка приватных чатов
 $bot->group(function (Nutgram $bot) {
     $bot->registerCommand(StartCommand::class);
-    $bot->onText(__('commands.start.menu.buy_btc'), Conversations\Order\Buy\BTCConversation::class);
+    $bot->onText(__('commands.start.menu.buy.btc'), Conversations\Order\Buy\BTCConversation::class);
 })->middleware(EnsureUserChat::class);
