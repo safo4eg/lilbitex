@@ -3,9 +3,17 @@
 return [
     'start' => [
         'menu' => [
-            'buy_btc' => 'Купить BTC',
+            'buy' => [
+                'btc' => 'Купить BTC'
+            ],
             'profile' => 'Профиль',
             'info' => 'Инфо'
+        ]
+    ],
+
+    'buy' => [
+        'btc' => [
+            'wallet_types' => \App\Enums\Order\WalletTypesEnum::getWalletTypesName()
         ]
     ]
 ];
