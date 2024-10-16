@@ -15,13 +15,13 @@ class StartCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
-        $bot->sendMessage(
+        $bot->sendMessageWithSaveMessageId(
             text: "Hello world",
             reply_markup: ReplyKeyboardMarkup::make(
                 resize_keyboard: true,
                 one_time_keyboard: false,
             )
-                ->addRow(KeyboardButton::make(__('commands.start.menu.buy_btc')))
+                ->addRow(KeyboardButton::make(__('commands.start.menu.buy.btc')))
                 ->addRow(
                     KeyboardButton::make(__('commands.start.menu.profile')),
                     KeyboardButton::make(__('commands.start.menu.info'))

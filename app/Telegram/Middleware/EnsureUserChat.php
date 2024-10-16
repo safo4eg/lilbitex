@@ -2,7 +2,6 @@
 
 namespace App\Telegram\Middleware;
 
-use App\Enums\ChatTypesEnum;
 use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\ChatType;
