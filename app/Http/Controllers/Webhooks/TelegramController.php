@@ -12,12 +12,6 @@ class TelegramController extends Controller
      */
     public function __invoke(Nutgram $bot)
     {
-        // глобально сохраняет последнее сообщание
-        Nutgram::macro('sendMessageWithSaveMessageId', function (...$args) {
-            $message = $this->sendMessage(...$args);
-            $this->setUserData('lastBotMessageId', $message->message_id, $message->chat()->id);
-        });
-
         $bot->run();
     }
 

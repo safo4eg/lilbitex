@@ -15,7 +15,7 @@ class StartCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
-        $bot->sendMessageWithSaveMessageId(
+        $bot->sendMessage(
             text: "Hello world",
             reply_markup: ReplyKeyboardMarkup::make(
                 resize_keyboard: true,

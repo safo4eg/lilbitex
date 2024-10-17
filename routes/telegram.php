@@ -2,16 +2,13 @@
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
 use SergiX44\Nutgram\Nutgram;
-use \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeAllGroupChats;
-use \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeAllPrivateChats;
 use \App\Telegram\Middleware\EnsureUserChat;
 use \App\Telegram\Middleware\EnsureManagerChat;
 use App\Telegram\Commands\User\StartCommand;
 use \App\Telegram\Conversations;
-use \App\Telegram\Middleware\CleanBotHistory;
+use \App\Telegram\Middleware\ConversationUserMessageId;
 
 // глобальные middleware
-$bot->middleware(CleanBotHistory::class);
 
 // обработка групповых чатов
 $bot->group(function (Nutgram $bot) {
