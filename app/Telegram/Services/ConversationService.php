@@ -30,13 +30,13 @@ final class ConversationService
     public static function deleteUserMessages(Nutgram $bot): void
     {
         $messageIds = $bot->getUserData('conversation.user_message_ids');
-        Log::channel('single')->debug($messageIds);
+
         if($messageIds !== null) {
             $bot->deleteMessages(
                 chat_id: $bot->chatId(),
                 message_ids: $messageIds
             );
-            Log::channel('single')->debug('зашло сюда');
+
             $bot->setUserData('conversation.user_message_ids', null, $bot->chatId());
         }
     }
