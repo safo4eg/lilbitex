@@ -2,20 +2,120 @@
 
 namespace App\Telegram\Conversations\Order\Buy;
 
+use App\Enums\Order\WalletTypesEnum;
+use App\Telegram\Services\ConversationService;
+use App\Telegram\Services\Order\Buy\BTCService;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Properties\ParseMode;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 class BTCConversation extends Conversation
 {
-    public function start(Nutgram $bot)
+    public int $walletType;
+    public string $amount;
+    public string $walletAddress;
+
+    protected ?string $step = 'requestWalletType';
+
+    public function requestWalletType(Nutgram $bot)
     {
-        $bot->sendMessage('Первый шаг покупки битка');
-        $this->next('secondStep');
+        $inlineKeyboardMarkup = InlineKeyboardMarkup::make();
+        foreach (WalletTypesEnum::cases() as $walletType) {
+            $inlineKeyboardMarkup->addRow(InlineKeyboardButton::make(
+                __('commands.buy.btc.wallet_types.' . $walletType->value),
+                callback_data: $walletType->value
+            ));
+        }
+
+        $message = $bot->sendMessage(
+            text: 'Выберите кошелёк куда будем пополнять:',
+            reply_markup: $inlineKeyboardMarkup
+        );
+
+        ConversationService::saveBotLastMessageId($bot, $message->message_id);
+        $this->next('handleWalletType');
     }
 
-    public function secondStep(Nutgram $bot)
+    public function handleWalletType(Nutgram $bot)
     {
-        $bot->sendMessage('Bye!');
-        $this->end();
+        ConversationService::saveUserMessageId($bot);
+        if(!$bot->isCallbackQuery()) {
+            $this->requestWalletType($bot);
+            return;
+        }
+
+        /**
+         * TODO: возможно нужна будет доп. валидация, чтобы с предыдущих шагов не падало
+         */
+        $this->walletType = (int) $bot->callbackQuery()->data;
+        $this->requestAmount($bot);
+    }
+
+    public function requestAmount(Nutgram $bot)
+    {
+        $message = $bot->sendMessage(
+            text: view('telegram.order.buy.btc.amount'),
+            parse_mode: ParseMode::HTML
+        );
+
+        ConversationService::saveBotLastMessageId($bot, $message->message_id);
+        $this->next('handleAmount');
+    }
+
+    public function handleAmount(Nutgram $bot)
+    {
+        ConversationService::saveUserMessageId($bot);
+        $amount = $bot->message()->text;
+
+        if(!$amount OR !BTCService::validateAmount($amount)) {
+            $this->requestAmount($bot);
+            return;
+        }
+
+        $this->amount = $amount;
+        $this->requestWalletAddress($bot);
+    }
+
+    public function requestWalletAddress(Nutgram $bot)
+    {
+        $message = $bot->sendMessage(
+            text: view(
+                view: 'telegram.order.buy.btc.wallet_address',
+                data: ['walletType' => WalletTypesEnum::getWalletTypesName()[$this->walletType]]
+            ),
+            parse_mode: ParseMode::HTML
+        );
+
+        ConversationService::saveBotLastMessageId($bot, $message->message_id);
+        $this->next('handleWalletAddress');
+    }
+
+    public function handleWalletAddress(Nutgram $bot)
+    {
+        $walletAddress = $bot->message()->text;
+
+        if(!$walletAddress OR !BTCService::validateWalletAddress($walletAddress)) {
+            $this->requestWalletAddress($bot);
+            return;
+        }
+
+        $this->walletAddress = $walletAddress;
+        $this->requestPayment($bot);
+    }
+
+    public function requestPayment(Nutgram $bot)
+    {
+        $bot->sendMessage(
+            'здесь реквизиты на оплату с просьбой оплатить (потом улетит в чат менеджеров'
+        );
+        ConversationService::saveBotLastMessageId($bot, $message->message_id);
+    }
+
+    public function closing(Nutgram $bot)
+    {
+        ConversationService::deleteUserMessages($bot);
+        ConversationService::deleteBotMessages($bot);
     }
 }
