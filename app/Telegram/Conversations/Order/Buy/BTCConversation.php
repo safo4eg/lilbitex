@@ -2,9 +2,14 @@
 
 namespace App\Telegram\Conversations\Order\Buy;
 
+use App\Enums\Order\AssetEnum;
+use App\Enums\Order\StatusEnum;
+use App\Enums\Order\TypeEnum;
 use App\Enums\Order\WalletTypeEnum;
-use App\Telegram\Services\ConversationService;
+use App\Models\Order;
 use App\Telegram\Services\Order\Buy\BTCService;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
@@ -103,6 +108,24 @@ class BTCConversation extends Conversation
     public function requestPayment(Nutgram $bot)
     {
         // во-первых проверка на завершенные оплаты
+        try {
+            DB::beginTransaction();
+            $user = User::where('chat_id', $bot->user()->id)->first();
+            Order::create([
+                'user_id' => $user->id,
+                'type' => TypeEnum::BUY,
+                'asset' => AssetEnum::BTC,
+                'status' => StatusEnum::PENDING_PAYMENT,
+                'amount' => $this->amount,
+                'wallet_type' => $this->walletType,
+                'wallet_address' => $this->walletAddress,
+                'exchange_rate' => '12.22'
+            ]);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
+
         $bot->sendMessageWithSaveId(
             'здесь реквизиты с кнопкой оплаты, пока напиши /start будет очистка шагов'
         );
