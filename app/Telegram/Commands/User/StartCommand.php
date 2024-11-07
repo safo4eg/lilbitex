@@ -2,6 +2,7 @@
 
 namespace App\Telegram\Commands\User;
 
+use App\Telegram\Services\BotService;
 use SergiX44\Nutgram\Handlers\Type\Command;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\KeyboardButton;
@@ -15,7 +16,7 @@ class StartCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
-        $bot->sendMessage(
+        $bot->sendMessageWithSaveId(
             text: "Hello world",
             reply_markup: ReplyKeyboardMarkup::make(
                 resize_keyboard: true,
@@ -27,5 +28,6 @@ class StartCommand extends Command
                     KeyboardButton::make(__('commands.start.menu.info'))
                 )
         );
+
     }
 }

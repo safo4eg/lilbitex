@@ -29,12 +29,11 @@ class BTCConversation extends Conversation
             ));
         }
 
-        $message = $bot->sendMessage(
+        $bot->sendMessageWithSaveId(
             text: 'Выберите кошелёк куда будем пополнять:',
             reply_markup: $inlineKeyboardMarkup
         );
 
-        ConversationService::saveBotLastMessageId($bot, $message->message_id);
         $this->next('handleWalletType');
     }
 
@@ -55,12 +54,11 @@ class BTCConversation extends Conversation
 
     public function requestAmount(Nutgram $bot)
     {
-        $message = $bot->sendMessage(
+        $bot->sendMessageWithSaveId(
             text: view('telegram.order.buy.btc.amount'),
             parse_mode: ParseMode::HTML
         );
 
-        ConversationService::saveBotLastMessageId($bot, $message->message_id);
         $this->next('handleAmount');
     }
 
@@ -80,7 +78,7 @@ class BTCConversation extends Conversation
 
     public function requestWalletAddress(Nutgram $bot)
     {
-        $message = $bot->sendMessage(
+        $bot->sendMessageWithSaveId(
             text: view(
                 view: 'telegram.order.buy.btc.wallet_address',
                 data: ['walletType' => WalletTypesEnum::getWalletTypesName()[$this->walletType]]
@@ -88,7 +86,6 @@ class BTCConversation extends Conversation
             parse_mode: ParseMode::HTML
         );
 
-        ConversationService::saveBotLastMessageId($bot, $message->message_id);
         $this->next('handleWalletAddress');
     }
 
@@ -107,15 +104,8 @@ class BTCConversation extends Conversation
 
     public function requestPayment(Nutgram $bot)
     {
-        $bot->sendMessage(
-            'здесь реквизиты на оплату с просьбой оплатить (потом улетит в чат менеджеров'
+        $bot->sendMessageWithSaveId(
+            'здесь реквизиты с кнопкой оплаты, пока напиши /start будет очистка шагов'
         );
-        ConversationService::saveBotLastMessageId($bot, $message->message_id);
-    }
-
-    public function closing(Nutgram $bot)
-    {
-        ConversationService::deleteUserMessages($bot);
-        ConversationService::deleteBotMessages($bot);
     }
 }
