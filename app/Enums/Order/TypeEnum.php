@@ -2,7 +2,7 @@
 
 namespace App\Enums\Order;
 
-enum TypesEnum: int
+enum TypeEnum: int
 {
     case SELL = 1;
     case BUY = 2;

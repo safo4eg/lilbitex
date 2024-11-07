@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedTinyInteger('type'); // продажа/покупка
+            $table->unsignedTinyInteger('status')->default(\App\Enums\Order\StatusEnum::PENDING_PAYMENT->value);
             $table->unsignedTinyInteger('asset'); // актив
             $table->decimal('amount', 38, 18); // количество для обмена
             $table->unsignedTinyInteger('wallet_type'); // тип кошелька

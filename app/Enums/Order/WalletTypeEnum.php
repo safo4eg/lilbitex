@@ -2,12 +2,12 @@
 
 namespace App\Enums\Order;
 
-enum WalletTypesEnum: int
+enum WalletTypeEnum: int
 {
     case BIGMAFIA = 1;
     case EXTERNAL = 2;
 
-    public static function getWalletTypesName(): array
+    public static function  getWalletTypesName(): array
     {
         return [
             self::BIGMAFIA->value => 'Bigmafia BTC',

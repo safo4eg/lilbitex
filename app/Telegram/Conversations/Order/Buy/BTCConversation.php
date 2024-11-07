@@ -2,7 +2,7 @@
 
 namespace App\Telegram\Conversations\Order\Buy;
 
-use App\Enums\Order\WalletTypesEnum;
+use App\Enums\Order\WalletTypeEnum;
 use App\Telegram\Services\ConversationService;
 use App\Telegram\Services\Order\Buy\BTCService;
 use SergiX44\Nutgram\Conversations\Conversation;
@@ -22,7 +22,7 @@ class BTCConversation extends Conversation
     public function requestWalletType(Nutgram $bot)
     {
         $inlineKeyboardMarkup = InlineKeyboardMarkup::make();
-        foreach (WalletTypesEnum::cases() as $walletType) {
+        foreach (WalletTypeEnum::cases() as $walletType) {
             $inlineKeyboardMarkup->addRow(InlineKeyboardButton::make(
                 __('commands.buy.btc.wallet_types.' . $walletType->value),
                 callback_data: $walletType->value
@@ -79,7 +79,7 @@ class BTCConversation extends Conversation
         $bot->sendMessageWithSaveId(
             text: view(
                 view: 'telegram.order.buy.btc.wallet_address',
-                data: ['walletType' => WalletTypesEnum::getWalletTypesName()[$this->walletType]]
+                data: ['walletType' => WalletTypeEnum::getWalletTypesName()[$this->walletType]]
             ),
             parse_mode: ParseMode::HTML
         );
@@ -102,6 +102,7 @@ class BTCConversation extends Conversation
 
     public function requestPayment(Nutgram $bot)
     {
+        // во-первых проверка на завершенные оплаты
         $bot->sendMessageWithSaveId(
             'здесь реквизиты с кнопкой оплаты, пока напиши /start будет очистка шагов'
         );

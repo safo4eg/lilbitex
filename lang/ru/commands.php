@@ -13,7 +13,7 @@ return [
 
     'buy' => [
         'btc' => [
-            'wallet_types' => \App\Enums\Order\WalletTypesEnum::getWalletTypesName()
+            'wallet_types' => \App\Enums\Order\WalletTypeEnum::getWalletTypesName()
         ]
     ]
 ];
