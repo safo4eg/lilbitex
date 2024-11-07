@@ -39,7 +39,6 @@ class BTCConversation extends Conversation
 
     public function handleWalletType(Nutgram $bot)
     {
-        ConversationService::saveUserMessageId($bot);
         if(!$bot->isCallbackQuery()) {
             $this->requestWalletType($bot);
             return;
@@ -64,7 +63,6 @@ class BTCConversation extends Conversation
 
     public function handleAmount(Nutgram $bot)
     {
-        ConversationService::saveUserMessageId($bot);
         $amount = $bot->message()->text;
 
         if(!$amount OR !BTCService::validateAmount($amount)) {
