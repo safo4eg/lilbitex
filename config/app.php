@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+     * Временный токен, который будет нужен для получения пройденных платежей
+     */
+    'api_key' => env('API_KEY'),
 ];
