@@ -17,6 +17,8 @@ return new class extends Migration
             $table->unsignedTinyInteger('exchanger_fee')->default(0);
             $table->unsignedMediumInteger('network_fee')->nullable();
             $table->unsignedInteger('balance')->nullable();
+            $table->unsignedInteger('min_amount')->default(500);
+            $table->unsignedInteger('max_amount')->default(50000);
         });
     }
 
