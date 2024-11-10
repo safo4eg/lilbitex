@@ -35,4 +35,7 @@ return [
         ],
     ],
 
+    'block_stream' => [
+        'api_url' => env('BLOCK_STREAM_API_URL', 'https://blockstream.info/api'),
+    ]
 ];

@@ -1,6 +1,7 @@
 <?php
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
+use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use \App\Telegram\Middleware\EnsureUserChat;
 use \App\Telegram\Middleware\EnsureManagerChat;
@@ -8,6 +9,8 @@ use App\Telegram\Commands\User\StartCommand;
 use \App\Telegram\Conversations;
 use \App\Telegram\Middleware\SaveLastUserMessageId;
 use \App\Telegram\Middleware\ClearBotHistory;
+
+Conversation::refreshOnDeserialize();
 
 // глобальные middleware
 $bot->middleware(SaveLastUserMessageId::class);
@@ -30,6 +33,16 @@ $bot->group(function (Nutgram $bot) {
 
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
+
+    $bot->onCommand('test', function (Nutgram $bot, \App\Services\API\BlockStreamAPIService $blockStreamAPI) {
+        $blockStreamAPI->getAddressBalance('n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1');
+
+        return $bot->sendMessage(
+            text: 'тестовая команда завершилась',
+            chat_id: $bot->chatId()
+        );
+    });
+
     $bot->onText(__('commands.start.menu.buy.btc'), Conversations\Order\Buy\BTCConversation::class);
 })
     ->middleware(EnsureUserChat::class)
