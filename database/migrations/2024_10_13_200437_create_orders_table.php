@@ -15,13 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('requisite_id');
+            $table->unsignedTinyInteger('exchanger_setting_id');
             $table->unsignedTinyInteger('type'); // продажа/покупка
             $table->unsignedTinyInteger('status')->default(\App\Enums\Order\StatusEnum::PENDING_PAYMENT->value);
-            $table->unsignedTinyInteger('asset'); // актив
             $table->unsignedBigInteger('amount'); // количество крипты для обмена
-            $table->unsignedTinyInteger('wallet_type'); // тип кошелька
             $table->string('wallet_address', 128);
-            $table->unsignedInteger('exchange_rate',); // курс
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')
@@ -30,6 +28,10 @@ return new class extends Migration
 
             $table->foreign('requisite_id')->references('id')
                 ->on('requisites')
+                ->onDelete('cascade');
+
+            $table->foreign('exchanger_setting_id')->references('id')
+                ->on('exchanger_settings')
                 ->onDelete('cascade');
         });
     }

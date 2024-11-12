@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Order;
+namespace App\Enums;
 
 enum WalletTypeEnum: int
 {

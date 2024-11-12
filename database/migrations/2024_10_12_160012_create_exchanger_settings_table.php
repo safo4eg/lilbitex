@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('exchanger_settings', function (Blueprint $table) {
             $table->unsignedTinyInteger('id')->autoIncrement();
+            $table->unsignedTinyInteger('asset');
+            $table->unsignedTinyInteger('wallet_type');
             $table->unsignedInteger('rate')->nullable();
             $table->unsignedTinyInteger('exchanger_fee')->default(0);
             $table->unsignedMediumInteger('network_fee')->nullable();

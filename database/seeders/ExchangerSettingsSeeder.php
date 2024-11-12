@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AssetEnum;
 use App\Enums\Requisite\StatusEnum;
-use App\Models\ExchangerSettings;
+use App\Enums\WalletTypeEnum;
+use App\Models\ExchangerSetting;
 use App\Models\Requisite;
 use Illuminate\Database\Seeder;
 
@@ -14,6 +16,15 @@ class ExchangerSettingsSeeder extends Seeder
      */
     public function run(): void
     {
-        ExchangerSettings::create([]);
+        ExchangerSetting::insert([
+            [
+                'asset' => AssetEnum::BTC->value,
+                'wallet_type' => WalletTypeEnum::EXTERNAL->value
+            ],
+            [
+                'asset' => AssetEnum::BTC->value,
+                'wallet_type' => WalletTypeEnum::BIGMAFIA->value
+            ]
+        ]);
     }
 }
