@@ -2,13 +2,16 @@
 
 namespace App\Telegram\Conversations\Order\Buy;
 
-use App\Enums\Order\AssetEnum;
+use App\Enums\AssetEnum;
 use App\Enums\Order\StatusEnum;
 use App\Enums\Order\TypeEnum;
-use App\Enums\Order\WalletTypeEnum;
+use App\Enums\WalletTypeEnum;
+use App\Helpers\BTCHelper;
+use App\Models\ExchangerSetting;
 use App\Models\Order;
-use App\Telegram\Services\Order\Buy\BTCService;
 use App\Models\User;
+use App\Services\BTCService;
+use App\Services\ExchangerSettingService;
 use Illuminate\Support\Facades\DB;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
@@ -18,11 +21,19 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 class BTCConversation extends Conversation
 {
-    public int $walletType;
     public string $amount;
-    public string $walletAddress;
-
+    public string $wallet_address;
     protected ?string $step = 'requestWalletType';
+
+    private ExchangerSetting $exchanger_setting;
+    private BTCService $btc_service;
+    private ExchangerSettingService $exchanger_setting_service;
+
+    public function __construct(BTCService $BTCService, ExchangerSettingService $exchangerSettingService)
+    {
+        $this->btc_service = $BTCService;
+        $this->exchanger_setting_service = $exchangerSettingService;
+    }
 
     public function requestWalletType(Nutgram $bot)
     {
@@ -49,21 +60,45 @@ class BTCConversation extends Conversation
             return;
         }
 
-        /**
-         * TODO: возможно нужна будет доп. валидация, чтобы с предыдущих шагов не падало
-         */
-        $this->walletType = (int) $bot->callbackQuery()->data;
+        $walletType = (int) $bot->callbackQuery()->data;
+
+        switch ($walletType) {
+            case WalletTypeEnum::BIGMAFIA->value:
+                $bot->sendMessage(text: 'пока недоступно, выберите внешний кошелек');
+                // получаем настройки для работы с BMB
+                $this->requestWalletType($bot);
+                return;
+            case WalletTypeEnum::EXTERNAL->value:
+                $this->exchanger_setting = ExchangerSetting::where([
+                    ['asset', '=', AssetEnum::BTC->value],
+                    ['wallet_type', '=', WalletTypeEnum::EXTERNAL->value],
+                ])->first();
+                break;
+        }
+
         $this->requestAmount($bot);
     }
 
     public function requestAmount(Nutgram $bot)
     {
-        $bot->sendMessageWithSaveId(
-            text: view('telegram.order.buy.btc.amount'),
-            parse_mode: ParseMode::HTML
-        );
+        $this->exchanger_setting_service->updateBalanceBTC($this->exchanger_setting);
+        $rate = $this->exchanger_setting->rate;
 
-        $this->next('handleAmount');
+        $viewData = [
+            'walletTypeName' => WalletTypeEnum::getWalletTypesName()[$this->exchanger_setting->wallet_type],
+            'balanceRUB' => $this->exchanger_setting->balance_rub,
+            'balanceBTC' => $this->exchanger_setting->balance_btc,
+            'minAmountRUB' => $this->exchanger_setting->min_amount,
+            'minAmountBTC' => BTCHelper::convertRubToBTC($this->exchanger_setting->min_amount, $rate),
+            'maxAmountRUB' => $this->exchanger_setting->max_amount,
+            'maxAmountBTC' => BTCHelper::convertRubToBTC($this->exchanger_setting->max_amount, $rate),
+            'rate' => $rate
+        ];
+
+        $bot->sendMessageWithSaveId(
+            text: view('telegram.order.buy.btc.amount', $viewData),
+            parse_mode: ParseMode::HTML,
+        );
     }
 
     public function handleAmount(Nutgram $bot)
@@ -72,6 +107,7 @@ class BTCConversation extends Conversation
 
         if(!$amount OR !BTCService::validateAmount($amount)) {
             $this->requestAmount($bot);
+            $bot->answerCallbackQuery();
             return;
         }
 

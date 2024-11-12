@@ -127,4 +127,6 @@ return [
      * Временный токен, который будет нужен для получения пройденных платежей
      */
     'api_key' => env('API_KEY'),
+
+    'exchanger_btc_address' => env('EXCHANGER_BTC_ADDRESS', 'n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1'),
 ];

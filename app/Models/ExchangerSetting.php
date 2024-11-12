@@ -6,7 +6,7 @@ use App\Helpers\BTCHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-class ExchangerSettings extends Model
+class ExchangerSetting extends Model
 {
     use HasFactory;
 
@@ -26,7 +26,7 @@ class ExchangerSettings extends Model
     protected function balanceBtc(): Attribute
     {
         return Attribute::make(
-            get: function (string $value) {
+            get: function (?string $value) {
                 return BTCHelper::convertSatoshiToBTC($this->balance);
             }
         );
@@ -35,14 +35,9 @@ class ExchangerSettings extends Model
     protected function balanceRub(): Attribute
     {
         return Attribute::make(
-            get: function (string $value) {
-                return BTCHelper::convertSatoshiToRub($this->balance);
+            get: function (?string $value) {
+                return BTCHelper::convertSatoshiToRub($this->balance, $this->rate);
             }
         );
-    }
-
-    public function updateBalance()
-    {
-
     }
 }
