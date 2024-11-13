@@ -19,7 +19,8 @@ class ExchangerSetting extends Model
     protected function casts(): array
     {
         return [
-            'balance' => 'string'
+            'balance' => 'string',
+            'rate' => 'string'
         ];
     }
 
@@ -37,6 +38,54 @@ class ExchangerSetting extends Model
         return Attribute::make(
             get: function (?string $value) {
                 return BTCHelper::convertSatoshiToRub($this->balance, $this->rate);
+            }
+        );
+    }
+
+    /**
+     * Минимальная сумма в битках
+     */
+    protected function minAmountBtc(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value) {
+                return BTCHelper::convertRubToBTC($this->min_amount, $this->rate);
+            }
+        );
+    }
+
+    /**
+     * Минимальная сумма в сатоши
+     */
+    protected function minAmountSatoshi(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value) {
+                return BTCHelper::convertBTCToSatoshi($this->min_amount_btc);
+            }
+        );
+    }
+
+    /**
+     * Максимальная сумма в битках
+     */
+    protected function maxAmountBtc(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value) {
+                return BTCHelper::convertRubToBTC($this->max_amount, $this->rate);
+            }
+        );
+    }
+
+    /**
+     * Минимальная сумма в сатоши
+     */
+    protected function maxAmountSatoshi(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value) {
+                return BTCHelper::convertBTCToSatoshi($this->max_amount_btc);
             }
         );
     }
