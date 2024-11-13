@@ -22,10 +22,27 @@ final class BTCHelper
     }
 
     /**
-     * Конвертация рублей в сатоши
+     * Конвертация рублей в BTC
      */
     public static function convertRubToBTC(string $rub, string $rate): string
     {
         return bcdiv($rub, $rate, 8);
+    }
+
+    /**
+     * Конвертация битка в сатоши
+     */
+    public static function convertBTCToSatoshi(string $btc): string
+    {
+        return bcmul($btc, '100000000', 0);
+    }
+
+    /**
+     * Конвертация рублей в сатоши
+     */
+    public static function convertRubToSatoshi(string $rub, string $rate): string
+    {
+        $btc = BTCHelper::convertRubToBTC($rub, $rate);
+        return BTCHelper::convertBTCToSatoshi($btc);
     }
 }
