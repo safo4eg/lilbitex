@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('chat_id')->unique();
             $table->string('first_name', 64);
             $table->string('username', 32);
+            $table->unsignedTinyInteger('personal_discount')->default(0);
             $table->timestamps();
         });
 
