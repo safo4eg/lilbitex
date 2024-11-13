@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Helpers\BTCHelper;
 use App\Models\ExchangerSetting;
 use App\Services\API\BlockStreamAPIService;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 final class BTCService
 {
@@ -19,16 +21,22 @@ final class BTCService
     }
 
     /**
-     * Валидация суммы для покупки, вернёт false если не прошло валидацию, true в противном случае
+     * Конвертация введенной суммы в сатоши
      */
-    public function validateAmount(string $amount): bool
+
+    public function convertAmountToSatoshi(string $amount, string $rate): ?string
     {
-        // маска для введённого числа чтобы пропускало целые и btc
-        if(preg_match('#^((\d){0,20}|(\d{0,20}\.\d{0,8}))$#u', $amount) === 0) {
-            return false;
+        preg_match('#^((?<rub>\d{0,20})|(?<btc>\d{0,20}\.\d{0,8}))$#u', $amount, $matches);
+
+        if(empty($matches) === false) {
+            if(empty($matches['rub']) === false) {
+                return BTCHelper::convertRubToSatoshi($amount, $rate);
+            } else {
+                return BTCHelper::convertBTCToSatoshi($amount);
+            }
         }
 
-        return true;
+        return null;
     }
 
     public function validateWalletAddress(string $walletAddress): bool

@@ -43,6 +43,14 @@ $bot->group(function (Nutgram $bot) {
         );
     });
 
+//    $bot->onMessage(function (Nutgram $bot, \App\Services\BTCService $BTCService) {
+//        $text = $bot->message()->text;
+//
+//        $BTCService->validateAmountFormat($text);
+//
+//        $bot->sendMessage('обработка');
+//    });
+
     $bot->onText(__('commands.start.menu.buy.btc'), Conversations\Order\Buy\BTCConversation::class);
 })
     ->middleware(EnsureUserChat::class)

@@ -20,7 +20,8 @@ class ExchangerSetting extends Model
     {
         return [
             'balance' => 'string',
-            'rate' => 'string'
+            'rate' => 'string',
+            'exchanger_fee' => 'string'
         ];
     }
 
@@ -86,6 +87,24 @@ class ExchangerSetting extends Model
         return Attribute::make(
             get: function (?string $value) {
                 return BTCHelper::convertBTCToSatoshi($this->max_amount_btc);
+            }
+        );
+    }
+
+    protected function networkFeeRub(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value) {
+                return BTCHelper::convertSatoshiToRub($this->network_fee, $this->rate);
+            }
+        );
+    }
+
+    protected function networkFeeBtc(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value) {
+                return BTCHelper::convertSatoshiToBTC($this->network_fee);
             }
         );
     }

@@ -15,6 +15,13 @@ class User extends Authenticatable
 
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return [
+            'personal_discount' => 'string'
+        ];
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'user_id', 'id');

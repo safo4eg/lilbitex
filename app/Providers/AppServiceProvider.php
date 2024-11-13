@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\API\BlockStreamAPIService;
+use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use Illuminate\Support\ServiceProvider;
@@ -18,12 +19,19 @@ class AppServiceProvider extends ServiceProvider
             return new BlockStreamAPIService();
         });
 
+        $this->app->singleton(MempoolSpaceAPIService::class, function () {
+            return new MempoolSpaceAPIService();
+        });
+
         $this->app->singleton(BTCService::class, function () {
             return new BTCService($this->app->make(BlockStreamAPIService::class));
         });
 
         $this->app->singleton(ExchangerSettingService::class, function () {
-            return new ExchangerSettingService($this->app->make(BlockStreamAPIService::class));
+            return new ExchangerSettingService(
+                $this->app->make(BlockStreamAPIService::class),
+                $this->app->make(MempoolSpaceAPIService::class)
+            );
         });
     }
 

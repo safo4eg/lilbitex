@@ -37,5 +37,9 @@ return [
 
     'block_stream' => [
         'api_url' => env('BLOCK_STREAM_API_URL', 'https://blockstream.info/api'),
+    ],
+
+    'mempool_space' => [
+        'api_url' => env('MEMPOOL_SPACE_API_URL', 'https://mempool.space/api/v1'),
     ]
 ];
