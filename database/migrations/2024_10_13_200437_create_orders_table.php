@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->unsignedTinyInteger('type'); // продажа/покупка;
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('requisite_id');
             $table->unsignedTinyInteger('exchanger_setting_id');
-            $table->unsignedTinyInteger('type'); // продажа/покупка
             $table->unsignedTinyInteger('status')->default(\App\Enums\Order\StatusEnum::PENDING_PAYMENT->value);
-            $table->unsignedBigInteger('amount'); // количество крипты для обмена
+            $table->unsignedBigInteger('amount');
+            $table->unsignedBigInteger('sum_to_send');
+            $table->decimal('sum_to_pay', 12, 2);
             $table->string('wallet_address', 128);
             $table->timestamps();
 
