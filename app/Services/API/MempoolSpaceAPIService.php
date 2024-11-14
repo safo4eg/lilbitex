@@ -40,4 +40,30 @@ class MempoolSpaceAPIService
         }
     }
 
+    /**
+     * Валидация адрес BTC
+     */
+    public function validateAddress(string $address): bool
+    {
+        try {
+            $response = Http::timeout(10)->get($this->url . '/validate-address/' . $address);
+
+            if($response->ok() === false) {
+                throw new \Exception('Ошибка в ответе при валидации адреса BTC, status !== ok');
+            }
+
+            $isValid = isset($response['isvalid'])
+                ? isset($response['isvalid'])
+                : null;
+
+            if($isValid === null) {
+                throw new \Exception('Ошибка в ответе при валидации адреса BTC, отсутствует ключ isvalid');
+            }
+
+            return $isValid;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
 }

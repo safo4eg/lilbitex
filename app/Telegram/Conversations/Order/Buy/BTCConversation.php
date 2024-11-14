@@ -10,6 +10,7 @@ use App\Helpers\BTCHelper;
 use App\Models\ExchangerSetting;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use Illuminate\Support\Facades\DB;
@@ -48,14 +49,21 @@ class BTCConversation extends Conversation
     protected ?string $step = 'requestWalletType';
     private BTCService $btc_service;
     private ExchangerSettingService $exchanger_setting_service;
+    private MempoolSpaceAPIService $mempool_space_service;
 
-    public function __construct(Nutgram $bot, BTCService $BTCService, ExchangerSettingService $exchangerSettingService)
+    public function __construct(
+        Nutgram $bot,
+        BTCService $BTCService,
+        ExchangerSettingService $exchangerSettingService,
+        MempoolSpaceAPIService $mempoolSpaceAPIService
+    )
     {
         $this->btc_service = $BTCService;
         $this->exchanger_setting_service = $exchangerSettingService;
         $this->user_model_id = User::where('chat_id', $bot->userId())
             ->pluck('id')
             ->first();
+        $this->mempool_space_service = $mempoolSpaceAPIService;
     }
 
     public function requestWalletType(Nutgram $bot)
@@ -202,42 +210,42 @@ class BTCConversation extends Conversation
         $bot->sendMessageWithSaveId(text: $message, parse_mode: ParseMode::HTML);
     }
 
-//    public function handleWalletAddress(Nutgram $bot)
-//    {
-//        $walletAddress = $bot->message()->text;
-//
-//        if(!$walletAddress OR !BTCService::validateWalletAddress($walletAddress)) {
-//            $this->requestWalletAddress($bot);
-//            return;
-//        }
-//
-//        $this->walletAddress = $walletAddress;
-//        $this->requestPayment($bot);
-//    }
-//
-//    public function requestPayment(Nutgram $bot)
-//    {
-//        // во-первых проверка на завершенные оплаты
-//        try {
-//            DB::beginTransaction();
-//            $user = User::where('chat_id', $bot->user()->id)->first();
-//            Order::create([
-//                'user_id' => $user->id,
-//                'type' => TypeEnum::BUY,
-//                'asset' => AssetEnum::BTC,
-//                'status' => StatusEnum::PENDING_PAYMENT,
-//                'amount' => $this->amount,
-//                'wallet_type' => $this->walletType,
-//                'wallet_address' => $this->walletAddress,
-//                'exchange_rate' => '12.22'
-//            ]);
-//            DB::commit();
-//        } catch (\Exception $e) {
-//            DB::rollBack();
-//        }
-//
-//        $bot->sendMessageWithSaveId(
-//            'здесь реквизиты с кнопкой оплаты, пока напиши /start будет очистка шагов'
-//        );
-//    }
+    public function handleWalletAddress(Nutgram $bot): void
+    {
+        $walletAddress = $bot->message()->text;
+
+        if(!$walletAddress OR !$this->mempool_space_service->validateAddress($walletAddress)) {
+            $bot->sendMessageWithSaveId(text: 'Некорректный btc-адрес, повторите попытку.',);
+            return;
+        }
+
+        $this->wallet_address = $walletAddress;
+        $this->requestPayment($bot);
+    }
+
+    public function requestPayment(Nutgram $bot)
+    {
+        // во-первых проверка на завершенные оплаты
+        try {
+            DB::beginTransaction();
+            $user = User::where('chat_id', $bot->user()->id)->first();
+            Order::create([
+                'user_id' => $user->id,
+                'type' => TypeEnum::BUY,
+                'asset' => AssetEnum::BTC,
+                'status' => StatusEnum::PENDING_PAYMENT,
+                'amount' => $this->amount,
+                'wallet_type' => $this->walletType,
+                'wallet_address' => $this->walletAddress,
+                'exchange_rate' => '12.22'
+            ]);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
+
+        $bot->sendMessageWithSaveId(
+            'здесь реквизиты с кнопкой оплаты, пока напиши /start будет очистка шагов'
+        );
+    }
 }
