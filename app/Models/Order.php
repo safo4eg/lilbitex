@@ -14,6 +14,13 @@ class Order extends Model
     protected $primaryKey = 'id';
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return [
+            'sum_to_pay' => 'string'
+        ];
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

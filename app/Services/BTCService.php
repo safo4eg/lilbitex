@@ -39,15 +39,6 @@ final class BTCService
         return null;
     }
 
-    public function validateWalletAddress(string $walletAddress): bool
-    {
-        if (preg_match('/^(1|3|bc1)[a-zA-Z0-9]{25,39}$/', $walletAddress)) {
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * Получение курса биткоина к рублю
      * - если возвращает -1, значит что-то не так при получении курса

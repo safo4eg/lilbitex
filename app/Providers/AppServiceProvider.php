@@ -6,6 +6,7 @@ use App\Services\API\BlockStreamAPIService;
 use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
+use App\Services\OrderService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,6 +33,10 @@ class AppServiceProvider extends ServiceProvider
                 $this->app->make(BlockStreamAPIService::class),
                 $this->app->make(MempoolSpaceAPIService::class)
             );
+        });
+
+        $this->app->singleton(OrderService::class, function () {
+            return new OrderService();
         });
     }
 

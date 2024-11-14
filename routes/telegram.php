@@ -34,8 +34,8 @@ $bot->group(function (Nutgram $bot) {
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
 
-    $bot->onCommand('test', function (Nutgram $bot, \App\Services\API\BlockStreamAPIService $blockStreamAPI) {
-        $blockStreamAPI->getAddressBalance('n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1');
+    $bot->onCommand('test', function (Nutgram $bot, \App\Services\API\MempoolSpaceAPIService $mempoolSpaceAPIService) {
+        $mempoolSpaceAPIService->validateAddress('n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1');
 
         return $bot->sendMessage(
             text: 'тестовая команда завершилась',

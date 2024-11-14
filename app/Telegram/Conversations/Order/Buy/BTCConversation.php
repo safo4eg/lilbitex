@@ -3,16 +3,18 @@
 namespace App\Telegram\Conversations\Order\Buy;
 
 use App\Enums\AssetEnum;
-use App\Enums\Order\StatusEnum;
 use App\Enums\Order\TypeEnum;
+use App\Enums\Requisite\StatusEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\ExchangerSetting;
 use App\Models\Order;
+use App\Models\Requisite;
 use App\Models\User;
 use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
+use App\Services\OrderService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Conversations\Conversation;
@@ -24,19 +26,14 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 class BTCConversation extends Conversation
 {
     /**
-     * Сумма к получению RUB
+     * Сумма к получению в сатоши
      */
-    public string $amount_rub;
+    public string $amount;
 
     /**
-     * Сумма к получению BTC
+     * Сумма для оплаты в сатоши
      */
-    public string $amount_btc;
-
-    /**
-     * Сумма для оплаты в RUB
-     */
-    public string $sum_to_pay_rub;
+    public string $sum_to_pay_satoshi;
 
     /**
      * Сумма для отправки в Satoshi
@@ -44,26 +41,25 @@ class BTCConversation extends Conversation
     public string $sum_to_send_satoshi;
 
     public string $wallet_address;
-    public int $user_model_id;
     public int $exchanger_setting_model_id;
     protected ?string $step = 'requestWalletType';
     private BTCService $btc_service;
     private ExchangerSettingService $exchanger_setting_service;
     private MempoolSpaceAPIService $mempool_space_service;
+    private OrderService $order_service;
 
     public function __construct(
         Nutgram $bot,
         BTCService $BTCService,
         ExchangerSettingService $exchangerSettingService,
-        MempoolSpaceAPIService $mempoolSpaceAPIService
+        MempoolSpaceAPIService $mempoolSpaceAPIService,
+        OrderService $orderService
     )
     {
         $this->btc_service = $BTCService;
         $this->exchanger_setting_service = $exchangerSettingService;
-        $this->user_model_id = User::where('chat_id', $bot->userId())
-            ->pluck('id')
-            ->first();
         $this->mempool_space_service = $mempoolSpaceAPIService;
+        $this->order_service = $orderService;
     }
 
     public function requestWalletType(Nutgram $bot)
@@ -137,11 +133,11 @@ class BTCConversation extends Conversation
     public function handleAmount(Nutgram $bot)
     {
         $setting = ExchangerSetting::find($this->exchanger_setting_model_id);
-        $user = User::find($this->user_model_id);
+        $user = User::where('chat_id', $bot->userId())->first();
         $amount = $bot->message()->text;
 
         $amountSatoshi = $this->btc_service->convertAmountToSatoshi($amount, $setting->rate);
-        Log::channel('single')->debug(BTCHelper::convertSatoshiToRub($amountSatoshi, $setting->rate));
+
         // если не прошла валидация формата суммы
         if($amountSatoshi === null) {
             $this->bot->sendMessageWithSaveId(text: 'Некорректный формат суммы, повтрите попытку.');
@@ -182,15 +178,9 @@ class BTCConversation extends Conversation
         }
 
         $sumToPaySatoshi = $sumToSendSatoshi + (int)$finalExchangerFee; // сумма которую нужно оплатить
-        // переводим суммы для оплаты
-        $sumToPayRUB = BTCHelper::convertSatoshiToRub($sumToPaySatoshi, $setting->rate);
-        $amountRUB = BTCHelper::convertSatoshiToRub($amountSatoshi, $setting->rate);
-        $amountBTC = BTCHelper::convertSatoshiToBTC($amountSatoshi);
 
-
-        $this->sum_to_pay_rub = $sumToPayRUB;
-        $this->amount_rub = $amountRUB;
-        $this->amount_btc = $amountBTC;
+        $this->amount = $amountSatoshi;
+        $this->sum_to_pay_satoshi = $sumToPaySatoshi;
         $this->sum_to_send_satoshi = $sumToSendSatoshi;
 
         $this->requestWalletAddress($bot);
@@ -202,12 +192,13 @@ class BTCConversation extends Conversation
 
         $message = view('telegram.order.buy.btc.wallet_address', [
             'walletType' => WalletTypeEnum::getWalletTypesName()[$setting->wallet_type],
-            'amountBTC' => $this->amount_btc,
-            'amountRUB' => $this->amount_rub,
-            'sumToPayRUB' => $this->sum_to_pay_rub
+            'amountBTC' => BTCHelper::convertSatoshiToBTC($this->amount),
+            'amountRUB' => BTCHelper::convertSatoshiToRub($this->amount, $setting->rate),
+            'sumToPayRUB' => BTCHelper::convertSatoshiToRub($this->sum_to_pay_satoshi, $setting->rate)
         ]);
 
         $bot->sendMessageWithSaveId(text: $message, parse_mode: ParseMode::HTML);
+        $this->next('handleWalletAddress');
     }
 
     public function handleWalletAddress(Nutgram $bot): void
@@ -225,27 +216,39 @@ class BTCConversation extends Conversation
 
     public function requestPayment(Nutgram $bot)
     {
-        // во-первых проверка на завершенные оплаты
+        $user = User::where('chat_id', $bot->user()->id)->first();
+        $requisite = Requisite::where('status', \App\Enums\Requisite\StatusEnum::ENABLED->value)->first();
+        $setting = ExchangerSetting::where('id', $this->exchanger_setting_model_id)->first();
+
+        $unusedKopecks = $this->order_service->getUnusedKopecks();
+        // если равен 00 тогда пиздец ошибку
+        $sumToPayRub = BTCHelper::convertSatoshiToRub($this->sum_to_pay_satoshi, $setting->rate);
+        $sumToPayRubWithKopecks = "$sumToPayRub.$unusedKopecks";
+
         try {
             DB::beginTransaction();
-            $user = User::where('chat_id', $bot->user()->id)->first();
             Order::create([
-                'user_id' => $user->id,
                 'type' => TypeEnum::BUY,
-                'asset' => AssetEnum::BTC,
-                'status' => StatusEnum::PENDING_PAYMENT,
+                'user_id' => $user->id,
+                'requisite_id' => $requisite->id,
+                'exchanger_setting_id' => $setting->id,
+                'status' => \App\Enums\Order\StatusEnum::PENDING_PAYMENT->value,
                 'amount' => $this->amount,
-                'wallet_type' => $this->walletType,
-                'wallet_address' => $this->walletAddress,
-                'exchange_rate' => '12.22'
+                'sum_to_send' => $this->sum_to_send_satoshi,
+                'sum_to_pay' => $sumToPayRubWithKopecks,
+                'wallet_address' => $this->wallet_address,
             ]);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            $bot->sendMessageWithSaveId(text: 'Что-то пошло не так, повторите последний шаг еще раз.',);
+            return;
         }
 
         $bot->sendMessageWithSaveId(
             'здесь реквизиты с кнопкой оплаты, пока напиши /start будет очистка шагов'
         );
+
+        $this->end();
     }
 }
