@@ -18,7 +18,8 @@ final class BTCHelper
     public static function convertSatoshiToRub(string $satoshi, string $rate): string
     {
         $satoshiRate = bcdiv($rate, '100000000', 8); // цена 1 сатоши
-        return bcmul($satoshi, $satoshiRate, 0);
+        $rub = bcmul($satoshi, $satoshiRate, 2);
+        return (string) ceil($rub);
     }
 
     /**

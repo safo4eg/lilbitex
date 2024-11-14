@@ -23,29 +23,24 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 class BTCConversation extends Conversation
 {
     /**
-     * Сумма для оплаты в сатоши
+     * Сумма к получению RUB
      */
-    public string $sum_satoshi;
+    public string $amount_rub;
+
+    /**
+     * Сумма к получению BTC
+     */
+    public string $amount_btc;
 
     /**
      * Сумма для оплаты в RUB
      */
-    public string $sum_rub;
+    public string $sum_to_pay_rub;
 
     /**
-     * Сумма для оплаты в BTC
+     * Сумма для отправки в Satoshi
      */
-    public string $sum_btc;
-
-    /**
-     * Фильная комиссия обменника (после вычета персональной скидки)
-     */
-    public string $final_exchanger_fee_rub;
-
-    /**
-     * Персональная скидка
-     */
-    public string $personal_discount_rub;
+    public string $sum_to_send_satoshi;
 
     public string $wallet_address;
     public int $user_model_id;
@@ -138,7 +133,7 @@ class BTCConversation extends Conversation
         $amount = $bot->message()->text;
 
         $amountSatoshi = $this->btc_service->convertAmountToSatoshi($amount, $setting->rate);
-
+        Log::channel('single')->debug(BTCHelper::convertSatoshiToRub($amountSatoshi, $setting->rate));
         // если не прошла валидация формата суммы
         if($amountSatoshi === null) {
             $this->bot->sendMessageWithSaveId(text: 'Некорректный формат суммы, повтрите попытку.');
@@ -168,50 +163,41 @@ class BTCConversation extends Conversation
         );
         $finalExchangerFee = bcsub($baseExchangerFee, $personalDiscount, 0);
 
-        $sumSatoshi = (int)$amountSatoshi + (int)$finalExchangerFee + $setting->network_fee;
-        $sumRUB = BTCHelper::convertSatoshiToRub($sumSatoshi, $setting->rate);
-        $sumBTC = BTCHelper::convertSatoshiToBTC($sumSatoshi);
+        $sumToSendSatoshi = (int) $amountSatoshi + $setting->network_fee; // сумма которая будет отправляться с кошеля
 
-        // сравнение итоговой суммы с балансом
-        $compareResult = bccomp($sumSatoshi, $setting->balance);
+        // сравнение итоговой суммы с резервом
+        $compareResult = bccomp($sumToSendSatoshi, $setting->balance);
 
         if($compareResult !== -1) {
             $this->bot->sendMessageWithSaveId(text: 'Введённая сумма с учетом комиссии превышает резерв обменника. Попробуйте позже.');
+            return;
         }
 
-        // сохраняем суммы и комиссии и запрашиваем кошелек
-        $this->final_exchanger_fee_rub = BTCHelper::convertSatoshiToRub($finalExchangerFee, $setting->rate);
-        // прибавляем +1, тк рубль теряется из-за отбрасывания дробной части
-        $this->personal_discount_rub = bcadd(
-            BTCHelper::convertSatoshiToRub($personalDiscount, $setting->rate),
-            '1',
-            0
-        );
+        $sumToPaySatoshi = $sumToSendSatoshi + (int)$finalExchangerFee; // сумма которую нужно оплатить
+        // переводим суммы для оплаты
+        $sumToPayRUB = BTCHelper::convertSatoshiToRub($sumToPaySatoshi, $setting->rate);
+        $amountRUB = BTCHelper::convertSatoshiToRub($amountSatoshi, $setting->rate);
+        $amountBTC = BTCHelper::convertSatoshiToBTC($amountSatoshi);
 
-        $this->sum_satoshi = $sumSatoshi;
-        $this->sum_rub = $sumRUB;
-        $this->sum_btc = $sumBTC;
+
+        $this->sum_to_pay_rub = $sumToPayRUB;
+        $this->amount_rub = $amountRUB;
+        $this->amount_btc = $amountBTC;
+        $this->sum_to_send_satoshi = $sumToSendSatoshi;
+
         $this->requestWalletAddress($bot);
     }
 
     public function requestWalletAddress(Nutgram $bot)
     {
-        $setting = ExchangerSetting::find($this->exchanger_setting_model_id);
-//        $bot->sendMessageWithSaveId(
-//            text: view(
-//                view: 'telegram.order.buy.btc.wallet_address',
-//                data: ['walletType' => WalletTypeEnum::getWalletTypesName()[$this->walletType]]
-//            ),
-//            parse_mode: ParseMode::HTML
-//        );
-//
-//        $this->next('handleWalletAddress');
+        $setting = ExchangerSetting::where('id', $this->exchanger_setting_model_id)->first();
 
-        $message = <<<HTML
-            <b>Сумма к оплате:</b> {$this->sum_rub}руб | {$this->sum_btc} включает:
-            <b>Комиссия обменника:</b> {$this->final_exchanger_fee_rub}руб с учетом скидки {$this->personal_discount_rub}руб
-            <b>Комиссия сети:</b> {$setting->network_fee_rub}руб | {$setting->network_fee_btc}
-        HTML;
+        $message = view('telegram.order.buy.btc.wallet_address', [
+            'walletType' => WalletTypeEnum::getWalletTypesName()[$setting->wallet_type],
+            'amountBTC' => $this->amount_btc,
+            'amountRUB' => $this->amount_rub,
+            'sumToPayRUB' => $this->sum_to_pay_rub
+        ]);
 
         $bot->sendMessageWithSaveId(text: $message, parse_mode: ParseMode::HTML);
     }
