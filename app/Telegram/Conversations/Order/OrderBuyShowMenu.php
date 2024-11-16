@@ -6,11 +6,11 @@ use App\Enums\Order\StatusEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
+use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
 use Illuminate\Database\Eloquent\Builder;
-use SergiX44\Nutgram\Conversations\InlineMenu;
 use SergiX44\Nutgram\Nutgram;
 
-class OrderBuyShowMenu extends InlineMenu
+class OrderBuyShowMenu extends InlineMenuWithSaveMessageId
 {
     public function start(Nutgram $bot)
     {
