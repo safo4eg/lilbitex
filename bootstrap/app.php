@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->reportable(function (\Throwable $e) {
             // не логируем исключения из задания на проверку таймаута счета
-            if($e instanceof \App\Exceptions\SilentVerifyOrderTimeoutJobException::class) {
+            if($e instanceof \App\Exceptions\SilentVerifyOrderTimeoutJobException) {
                 return;
             }
 
