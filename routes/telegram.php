@@ -34,14 +34,7 @@ $bot->group(function (Nutgram $bot) {
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
 
-    $bot->onCommand('test', function (Nutgram $bot, \App\Services\API\MempoolSpaceAPIService $mempoolSpaceAPIService) {
-        $mempoolSpaceAPIService->validateAddress('n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1');
-
-        return $bot->sendMessage(
-            text: 'тестовая команда завершилась',
-            chat_id: $bot->chatId()
-        );
-    });
+    $bot->onCommand('test', Conversations\Order\OrderBuyShowMenu::class);
 
 //    $bot->onMessage(function (Nutgram $bot, \App\Services\BTCService $BTCService) {
 //        $text = $bot->message()->text;

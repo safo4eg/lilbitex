@@ -15,6 +15,7 @@ use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use App\Services\OrderService;
+use App\Telegram\Conversations\Order\OrderBuyShowMenu;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Conversations\Conversation;
@@ -245,10 +246,7 @@ class BTCConversation extends Conversation
             return;
         }
 
-        $bot->sendMessageWithSaveId(
-            'здесь реквизиты с кнопкой оплаты, пока напиши /start будет очистка шагов'
-        );
-
+        OrderBuyShowMenu::begin($bot);
         $this->end();
     }
 }

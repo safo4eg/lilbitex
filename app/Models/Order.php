@@ -21,8 +21,20 @@ class Order extends Model
         ];
     }
 
+    protected $with = ['user', 'requisite', 'setting'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function requisite(): BelongsTo
+    {
+        return $this->belongsTo(Requisite::class, 'requisite_id', 'id');
+    }
+
+    public function setting(): BelongsTo
+    {
+        return $this->belongsTo(ExchangerSetting::class, 'exchanger_setting_id', 'id');
     }
 }
