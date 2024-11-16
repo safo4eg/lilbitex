@@ -64,7 +64,8 @@ final class ExchangerSettingService
                     $networkFee = 0;
                     break;
                 case WalletTypeEnum::EXTERNAL->value:
-                    $feePerByte = $this->mempool_space_service->getRecommendedFees();
+//                    $feePerByte = $this->mempool_space_service->getRecommendedFees();
+                    $feePerByte = 8; // тестово установил 8 сатоши/байт
                     $feePerByte = ($feePerByte === -1)
                         ? $setting->network_fee
                         : $feePerByte;
