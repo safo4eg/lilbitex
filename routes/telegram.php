@@ -6,6 +6,7 @@ use SergiX44\Nutgram\Nutgram;
 use \App\Telegram\Middleware\EnsureUserChat;
 use \App\Telegram\Middleware\EnsureManagerChat;
 use App\Telegram\Commands\User\StartCommand;
+use App\Telegram\Commands\User\OrderCommand;
 use \App\Telegram\Conversations;
 use \App\Telegram\Middleware\SaveLastUserMessageId;
 use \App\Telegram\Middleware\ClearBotHistory;
@@ -24,7 +25,9 @@ $bot->group(function (Nutgram $bot) {
 
 // обработка приватных чатов
 $bot->group(function (Nutgram $bot) {
-    $bot->registerCommand(StartCommand::class);
+    $bot->onCommand('start', StartCommand::class);
+    $bot->onCommand('order', OrderCommand::class);
+
     $bot->onCommand('null', function (Nutgram $bot) {
         $bot->deleteUserData('bot.message_ids', $bot->userId());
         $bot->deleteUserData('bot.last_message_id', $bot->userId());
@@ -34,7 +37,9 @@ $bot->group(function (Nutgram $bot) {
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
 
-    $bot->onCommand('test', Conversations\Order\OrderBuyShowMenu::class);
+    $bot->onCommand('test', function (Nutgram $bot) {
+        $bot->hearText('/order');
+    });
 
 //    $bot->onMessage(function (Nutgram $bot, \App\Services\BTCService $BTCService) {
 //        $text = $bot->message()->text;

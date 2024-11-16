@@ -31,29 +31,6 @@ class BotService
     }
 
     /**
-     * Удалить сообщения пользователя
-     */
-    public static function deleteUserMessages(Nutgram $bot): void
-    {
-        $messageIds = $bot->getUserData('user.message_ids');
-        $lastMessageId = $bot->getUserData('user.last_message_id');
-
-        if($messageIds) {
-            $bot->deleteMessages(
-                chat_id: $bot->chatId(),
-                message_ids: $messageIds
-            );
-
-            if($lastMessageId) {
-                $messageIds = [$lastMessageId];
-                $bot->setUserData('user.last_message_id', null, $bot->chatId());
-            }
-
-            $bot->setUserData('user.message_ids', $messageIds, $bot->chatId());
-        }
-    }
-
-    /**
      * Сохранение сообщений бота
      */
     public static function saveBotLastMessageId(Nutgram $bot, ?int $messageId): void
@@ -75,10 +52,16 @@ class BotService
         $bot->setUserData('bot.last_message_id', $lastMessageId, $bot->chatId());
     }
 
+    public static function clearBotHistory(Nutgram $bot): void
+    {
+        BotService::deleteUserMessages($bot);
+        BotService::deleteBotMessages($bot);
+    }
+
     /**
      * Удалить сохраненные значения бота
      */
-    public static function deleteBotMessages(Nutgram $bot): void
+    private static function deleteBotMessages(Nutgram $bot): void
     {
         self::saveBotLastMessageId($bot, null);
 
@@ -91,6 +74,29 @@ class BotService
             );
 
             $bot->setUserData('bot.message_ids', null, $bot->chatId());
+        }
+    }
+
+    /**
+     * Удалить сообщения пользователя
+     */
+    private static function deleteUserMessages(Nutgram $bot): void
+    {
+        $messageIds = $bot->getUserData('user.message_ids');
+        $lastMessageId = $bot->getUserData('user.last_message_id');
+
+        if($messageIds) {
+            if($lastMessageId) {
+                $messageIds[] = $lastMessageId;
+                $bot->setUserData('user.last_message_id', null, $bot->chatId());
+            }
+
+            $bot->deleteMessages(
+                chat_id: $bot->chatId(),
+                message_ids: $messageIds
+            );
+
+            $bot->setUserData('user.message_ids', $messageIds, $bot->chatId());
         }
     }
 }

@@ -3,8 +3,6 @@
 namespace App\Telegram\Commands\User;
 
 use App\Models\User;
-use App\Telegram\Services\BotService;
-use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Handlers\Type\Command;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\KeyboardButton;

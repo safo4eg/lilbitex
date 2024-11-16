@@ -4,7 +4,6 @@ namespace App\Telegram\Conversations\Order\Buy;
 
 use App\Enums\AssetEnum;
 use App\Enums\Order\TypeEnum;
-use App\Enums\Requisite\StatusEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\ExchangerSetting;
@@ -16,8 +15,9 @@ use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use App\Services\OrderService;
 use App\Telegram\Conversations\Order\OrderBuyShowMenu;
+use App\Telegram\Services\BotService;
+use App\Telegram\Services\MockService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
@@ -50,11 +50,10 @@ class BTCConversation extends Conversation
     private OrderService $order_service;
 
     public function __construct(
-        Nutgram $bot,
         BTCService $BTCService,
         ExchangerSettingService $exchangerSettingService,
         MempoolSpaceAPIService $mempoolSpaceAPIService,
-        OrderService $orderService
+        OrderService $orderService,
     )
     {
         $this->btc_service = $BTCService;
@@ -246,6 +245,7 @@ class BTCConversation extends Conversation
             return;
         }
 
+        BotService::clearBotHistory($bot);
         OrderBuyShowMenu::begin($bot);
         $this->end();
     }
