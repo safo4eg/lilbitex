@@ -53,7 +53,7 @@ class MempoolSpaceAPIService
             }
 
             $isValid = isset($response['isvalid'])
-                ? isset($response['isvalid'])
+                ? $response['isvalid']
                 : null;
 
             if($isValid === null) {

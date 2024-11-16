@@ -16,7 +16,6 @@ use App\Services\ExchangerSettingService;
 use App\Services\OrderService;
 use App\Telegram\Conversations\Order\OrderBuyShowMenu;
 use App\Telegram\Services\BotService;
-use App\Telegram\Services\MockService;
 use Illuminate\Support\Facades\DB;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
@@ -205,7 +204,12 @@ class BTCConversation extends Conversation
     {
         $walletAddress = $bot->message()->text;
 
-        if(!$walletAddress OR !$this->mempool_space_service->validateAddress($walletAddress)) {
+        if(!$walletAddress) {
+            $bot->sendMessageWithSaveId(text: 'Вам нужно ввести адрес своего BTC-кошелька.',);
+            return;
+        }
+
+        if(!$this->mempool_space_service->validateAddress($walletAddress)) {
             $bot->sendMessageWithSaveId(text: 'Некорректный btc-адрес, повторите попытку.',);
             return;
         }
