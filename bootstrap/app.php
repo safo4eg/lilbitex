@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->reportable(function (\Throwable $e) {
+            // не логируем исключения из задания на проверку таймаута счета
+            if($e instanceof \App\Exceptions\SilentVerifyOrderTimeoutJobException::class) {
+                return;
+            }
+
             $trace = collect($e->getTrace())->take(5);
 
             Log::channel('telegram')->info('Error', [
