@@ -15,8 +15,6 @@ class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
 {
     public function start(Nutgram $bot)
     {
-        Log::channel('single')->debug($this->chatId);
-
         $order = Order::whereHas('user', function (Builder $query) use($bot) {
             $query->where('chat_id', $bot->userId());
         })
@@ -36,7 +34,7 @@ class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
             'sum' => $order->sum_to_pay
         ];
 
-        $this->menuText(text: view('telegram.order.show', $viewData))
+        $this->menuText(text: view('telegram.order.buy.pending-payment-menu', $viewData))
             ->showMenu();
     }
 

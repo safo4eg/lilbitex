@@ -207,7 +207,7 @@ class BTCConversation extends Conversation
     {
         $setting = ExchangerSetting::where('id', $this->exchanger_setting_model_id)->first();
 
-        $message = view('telegram.order.buy.wallet_address', [
+        $message = view('telegram.order.buy.wallet-address', [
             'walletType' => WalletTypeEnum::getWalletTypesName()[$setting->wallet_type],
             'amountBTC' => BTCHelper::convertSatoshiToBTC($this->amount),
             'amountRUB' => BTCHelper::convertSatoshiToRub($this->amount, $setting->rate),
