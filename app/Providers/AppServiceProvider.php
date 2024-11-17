@@ -7,7 +7,9 @@ use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use App\Services\OrderService;
+use App\Telegram\Services\BotService;
 use Illuminate\Support\ServiceProvider;
+use SergiX44\Nutgram\Nutgram;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,6 +47,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Nutgram::macro('sendMessageWithSaveId', function (...$args) {
+            $message = $this->sendMessage(...$args);
+            BotService::saveBotLastMessageId($this, $message->message_id, $args['chat_id']);
+        });
     }
 }
