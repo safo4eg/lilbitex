@@ -127,7 +127,7 @@ class BTCConversation extends Conversation
         ];
 
         $bot->sendMessageWithSaveId(
-            text: view('telegram.order.buy.btc.amount', $viewData),
+            text: view('telegram.order.buy.amount', $viewData),
             parse_mode: ParseMode::HTML,
             chat_id: $bot->chatId()
         );
@@ -207,7 +207,7 @@ class BTCConversation extends Conversation
     {
         $setting = ExchangerSetting::where('id', $this->exchanger_setting_model_id)->first();
 
-        $message = view('telegram.order.buy.btc.wallet_address', [
+        $message = view('telegram.order.buy.wallet_address', [
             'walletType' => WalletTypeEnum::getWalletTypesName()[$setting->wallet_type],
             'amountBTC' => BTCHelper::convertSatoshiToBTC($this->amount),
             'amountRUB' => BTCHelper::convertSatoshiToRub($this->amount, $setting->rate),
