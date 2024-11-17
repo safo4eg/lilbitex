@@ -5,14 +5,43 @@
  */
 namespace App\Telegram\Conversations\Order\Buy;
 
+use App\Enums\Order\StatusEnum;
+use App\Enums\WalletTypeEnum;
+use App\Helpers\BTCHelper;
+use App\Models\Order;
 use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
+use Illuminate\Database\Eloquent\Builder;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 
 class CancelledOrderMenu extends InlineMenuWithSaveMessageId
 {
-    public function start()
+    public function start(Nutgram $bot)
     {
-        $this->menuText(text: 'Счет был отменен')
+        // пока что только для битка делаю,
+        //возможно в дальнейшем здесь придется абстрактно для других монет сделать
+
+        // получаем последний отменённый счёт
+        $order = Order::whereHas('user', function (Builder $query) use($bot) {
+            $query->where('chat_id', $this->chatId);
+        })
+            ->where('status', StatusEnum::CANCELLED->value)
+            ->latest()
+            ->first();
+
+        $viewData = [
+            'orderNumber' => $order->id,
+            'walletType' => WalletTypeEnum::getWalletTypesName()[$order->setting->wallet_type],
+            'walletAddress' => $order->wallet_address,
+            'amountBTC' => BTCHelper::convertSatoshiToBTC($order->amount),
+            'amountRUB' => BTCHelper::convertSatoshiToRub($order->amount, $order->setting->rate),
+            'sum' => $order->sum_to_pay
+        ];
+
+        $this->menuText(
+            text: view('telegram.order.buy.cancelled-menu', $viewData),
+            opt: ['parse_mode' => ParseMode::HTML]
+        )
             ->showMenu();
     }
 
