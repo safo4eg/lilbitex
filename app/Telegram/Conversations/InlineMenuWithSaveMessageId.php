@@ -10,10 +10,14 @@ abstract class InlineMenuWithSaveMessageId extends InlineMenu
 {
     protected function doOpen(string $text, InlineKeyboardMarkup $buttons, array $opt): Message|null
     {
+        $chatId = empty($this->chatId)
+            ? $this->bot->chatId()
+            : $this->chatId;
+
         return $this->bot->sendMessageWithSaveId(...[
             'reply_markup' => $buttons,
             'text' => $text,
-            'chat_id' => $this->chatId,
+            'chat_id' => $chatId,
             ...$opt,
         ]);
     }

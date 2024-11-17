@@ -32,7 +32,8 @@ class StartCommand extends Command
                 ->addRow(
                     KeyboardButton::make(__('commands.start.menu.profile')),
                     KeyboardButton::make(__('commands.start.menu.info'))
-                )
+                ),
+            chat_id: $bot->chatId()
         );
 
     }

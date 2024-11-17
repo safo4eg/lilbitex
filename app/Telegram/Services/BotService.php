@@ -33,10 +33,10 @@ class BotService
     /**
      * Сохранение сообщений бота
      */
-    public static function saveBotLastMessageId(Nutgram $bot, ?int $messageId): void
+    public static function saveBotLastMessageId(Nutgram $bot, ?int $messageId, int $chatId): void
     {
-        $messageIds = $bot->getUserData('bot.message_ids');
-        $lastMessageId = $bot->getUserData('bot.last_message_id');
+        $messageIds = $bot->getUserData('bot.message_ids', $chatId);
+        $lastMessageId = $bot->getUserData('bot.last_message_id', $chatId);
 
         if ($messageIds === null) {
             $messageIds = [];
@@ -48,55 +48,64 @@ class BotService
 
         $lastMessageId = $messageId;
 
-        $bot->setUserData('bot.message_ids', $messageIds, $bot->chatId());
-        $bot->setUserData('bot.last_message_id', $lastMessageId, $bot->chatId());
-    }
-
-    public static function clearBotHistory(Nutgram $bot): void
-    {
-        BotService::deleteUserMessages($bot);
-        BotService::deleteBotMessages($bot);
+        $bot->setUserData('bot.message_ids', $messageIds, $chatId);
+        $bot->setUserData('bot.last_message_id', $lastMessageId, $chatId);
     }
 
     /**
-     * Удалить сохраненные значения бота
+     * @param Nutgram $bot
+     * @param int $chatId
+     * @return void
      */
-    private static function deleteBotMessages(Nutgram $bot): void
+    public static function clearBotHistory(Nutgram $bot, int $chatId): void
     {
-        self::saveBotLastMessageId($bot, null);
+        BotService::deleteUserMessages($bot, $chatId);
+        BotService::deleteBotMessages($bot, $chatId);
+    }
 
-        $messageIds = $bot->getUserData('bot.message_ids');
+    /**
+     * Удалить сообщения бота
+     * @param Nutgram $bot - Фейк бот
+     * @param int $chatId
+     */
+    private static function deleteBotMessages(Nutgram $bot, int $chatId): void
+    {
+        self::saveBotLastMessageId($bot, null, $chatId);
+
+        $messageIds = $bot->getUserData('bot.message_ids', $chatId);
 
         if($messageIds) {
             $bot->deleteMessages(
-                chat_id: $bot->chatId(),
+                chat_id: $chatId,
                 message_ids: $messageIds
             );
 
-            $bot->setUserData('bot.message_ids', null, $bot->chatId());
+            $bot->setUserData('bot.message_ids', null, $chatId);
         }
     }
 
     /**
      * Удалить сообщения пользователя
+     * @param Nutgram $bot - Фейк бот
+     * @param int $chatId
      */
-    private static function deleteUserMessages(Nutgram $bot): void
+    private static function deleteUserMessages(Nutgram $bot, int $chatId): void
     {
-        $messageIds = $bot->getUserData('user.message_ids');
-        $lastMessageId = $bot->getUserData('user.last_message_id');
+        $messageIds = $bot->getUserData('user.message_ids', $chatId);
+        $lastMessageId = $bot->getUserData('user.last_message_id', $chatId);
 
         if($messageIds) {
             if($lastMessageId) {
                 $messageIds[] = $lastMessageId;
-                $bot->setUserData('user.last_message_id', null, $bot->chatId());
+                $bot->setUserData('user.last_message_id', null, $chatId);
             }
 
             $bot->deleteMessages(
-                chat_id: $bot->chatId(),
+                chat_id: $chatId,
                 message_ids: $messageIds
             );
 
-            $bot->setUserData('user.message_ids', $messageIds, $bot->chatId());
+            $bot->setUserData('user.message_ids', $messageIds, $chatId);
         }
     }
 }
