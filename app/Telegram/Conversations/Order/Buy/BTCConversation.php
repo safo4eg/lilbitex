@@ -6,6 +6,7 @@ use App\Enums\AssetEnum;
 use App\Enums\Order\TypeEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
+use App\Jobs\VerifyOrderTimeoutJob;
 use App\Models\ExchangerSetting;
 use App\Models\Order;
 use App\Models\Requisite;
@@ -14,7 +15,7 @@ use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use App\Services\OrderService;
-use App\Telegram\Conversations\Order\OrderBuyShowMenu;
+use App\Telegram\Conversations\Order\Buy\PendingPaymentOrderMenu;
 use App\Telegram\Services\BotService;
 use Illuminate\Support\Facades\DB;
 use SergiX44\Nutgram\Conversations\Conversation;
@@ -73,7 +74,8 @@ class BTCConversation extends Conversation
 
         $bot->sendMessageWithSaveId(
             text: 'Выберите кошелёк куда будем пополнять:',
-            reply_markup: $inlineKeyboardMarkup
+            reply_markup: $inlineKeyboardMarkup,
+            chat_id: $bot->chatId()
         );
 
         $this->next('handleWalletType');
@@ -91,7 +93,10 @@ class BTCConversation extends Conversation
         switch ($walletType) {
             case WalletTypeEnum::BIGMAFIA->value:
                 // получаем настройки для работы с BMB
-                $bot->sendMessageWithSaveId(text: 'пока недоступно, выберите внешний кошелек');
+                $bot->sendMessageWithSaveId(
+                    text: 'пока недоступно, выберите внешний кошелек',
+                    chat_id: $bot->chatId()
+                );
                 return;
             case WalletTypeEnum::EXTERNAL->value:
                 $this->exchanger_setting_model_id = ExchangerSetting::where([
@@ -124,6 +129,7 @@ class BTCConversation extends Conversation
         $bot->sendMessageWithSaveId(
             text: view('telegram.order.buy.btc.amount', $viewData),
             parse_mode: ParseMode::HTML,
+            chat_id: $bot->chatId()
         );
 
         $this->next('handleAmount');
@@ -139,15 +145,24 @@ class BTCConversation extends Conversation
 
         // если не прошла валидация формата суммы
         if($amountSatoshi === null) {
-            $this->bot->sendMessageWithSaveId(text: 'Некорректный формат суммы, повтрите попытку.');
+            $this->bot->sendMessageWithSaveId(
+                text: 'Некорректный формат суммы, повтрите попытку.',
+                chat_id: $bot->chatId()
+            );
             return;
         }
 
         if((int)$amountSatoshi < $setting->min_amount_satoshi) {
-            $this->bot->sendMessageWithSaveId(text: 'Введённая сумма меньше минимальной.');
+            $this->bot->sendMessageWithSaveId(
+                text: 'Введённая сумма меньше минимальной.',
+                chat_id: $bot->chatId()
+            );
             return;
         } else if((int)$amountSatoshi > $setting->max_amount_satoshi) {
-            $this->bot->sendMessageWithSaveId(text: 'Введённая сумма больше максимальной.');
+            $this->bot->sendMessageWithSaveId(
+                text: 'Введённая сумма больше максимальной.',
+                chat_id: $bot->chatId()
+            );
             return;
         }
 
@@ -172,7 +187,10 @@ class BTCConversation extends Conversation
         $compareResult = bccomp($sumToSendSatoshi, $setting->balance);
 
         if($compareResult !== -1) {
-            $this->bot->sendMessageWithSaveId(text: 'Введённая сумма с учетом комиссии превышает резерв обменника. Попробуйте позже.');
+            $this->bot->sendMessageWithSaveId(
+                text: 'Введённая сумма с учетом комиссии превышает резерв обменника. Попробуйте позже.',
+                chat_id: $bot->chatId()
+            );
             return;
         }
 
@@ -196,7 +214,11 @@ class BTCConversation extends Conversation
             'sumToPayRUB' => BTCHelper::convertSatoshiToRub($this->sum_to_pay_satoshi, $setting->rate)
         ]);
 
-        $bot->sendMessageWithSaveId(text: $message, parse_mode: ParseMode::HTML);
+        $bot->sendMessageWithSaveId(
+            text: $message,
+            parse_mode: ParseMode::HTML,
+            chat_id: $bot->chatId()
+        );
         $this->next('handleWalletAddress');
     }
 
@@ -205,12 +227,18 @@ class BTCConversation extends Conversation
         $walletAddress = $bot->message()->text;
 
         if(!$walletAddress) {
-            $bot->sendMessageWithSaveId(text: 'Вам нужно ввести адрес своего BTC-кошелька.',);
+            $bot->sendMessageWithSaveId(
+                text: 'Вам нужно ввести адрес своего BTC-кошелька.',
+                chat_id: $bot->chatId()
+            );
             return;
         }
 
         if(!$this->mempool_space_service->validateAddress($walletAddress)) {
-            $bot->sendMessageWithSaveId(text: 'Некорректный btc-адрес, повторите попытку.',);
+            $bot->sendMessageWithSaveId(
+                text: 'Некорректный btc-адрес, повторите попытку.',
+                chat_id: $bot->chatId()
+            );
             return;
         }
 
@@ -231,7 +259,7 @@ class BTCConversation extends Conversation
 
         try {
             DB::beginTransaction();
-            Order::create([
+            $order = Order::create([
                 'type' => TypeEnum::BUY,
                 'user_id' => $user->id,
                 'requisite_id' => $requisite->id,
@@ -245,12 +273,20 @@ class BTCConversation extends Conversation
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $bot->sendMessageWithSaveId(text: 'Что-то пошло не так, повторите последний шаг еще раз.',);
+            $bot->sendMessageWithSaveId(
+                text: 'Что-то пошло не так, повторите последний шаг еще раз.',
+                chat_id: $bot->chatId()
+            );
             return;
         }
 
-        BotService::clearBotHistory($bot);
-        OrderBuyShowMenu::begin($bot);
         $this->end();
+        BotService::clearBotHistory($bot, $bot->userId());
+        PendingPaymentOrderMenu::begin(
+            bot: $bot,
+            userId: $bot->userId(),
+            chatId: $bot->chatId(),
+        );
+        VerifyOrderTimeoutJob::dispatch($order);
     }
 }

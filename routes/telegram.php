@@ -37,8 +37,11 @@ $bot->group(function (Nutgram $bot) {
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
 
-    $bot->onCommand('test', function (Nutgram $bot) {
-        $bot->hearText('/order');
+    $bot->onCommand('test', function (Nutgram $bot, \App\Services\API\MempoolSpaceAPIService $mempoolSpaceAPIService) {
+        $res = $mempoolSpaceAPIService->validateAddress('n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1');
+
+        if($res) $bot->sendMessage('корректный');
+        else $bot->sendMessage('некорректный');
     });
 
 //    $bot->onMessage(function (Nutgram $bot, \App\Services\BTCService $BTCService) {

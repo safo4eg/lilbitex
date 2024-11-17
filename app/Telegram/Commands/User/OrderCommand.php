@@ -15,6 +15,7 @@ class OrderCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
+        // здесь желательно обработку сделать какую из менюшек заказа показывать
         PendingPaymentOrderMenu::begin(bot: $bot, userId: $bot->userId(), chatId: $bot->chatId());
     }
 }
