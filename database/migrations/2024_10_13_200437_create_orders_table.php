@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('exchanger_setting_id');
             $table->unsignedTinyInteger('status')->default(\App\Enums\Order\StatusEnum::PENDING_PAYMENT->value);
             $table->unsignedBigInteger('amount');
-            $table->unsignedBigInteger('sum_to_send');
+            $table->unsignedBigInteger('network_fee');
             $table->decimal('sum_to_pay', 12, 2);
             $table->string('wallet_address', 128);
             $table->timestamps();

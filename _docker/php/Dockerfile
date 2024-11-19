@@ -9,10 +9,11 @@ RUN apk --no-cache add \
     libzip-dev \
     libpq-dev \
     zip unzip\
+    gmp-dev \
     tzdata
 
 
-RUN docker-php-ext-install pdo_mysql bcmath gd zip
+RUN docker-php-ext-install pdo_mysql bcmath gd zip gmp
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 

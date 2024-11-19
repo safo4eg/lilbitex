@@ -36,11 +36,6 @@ class BTCConversation extends Conversation
      */
     public string $sum_to_pay_satoshi;
 
-    /**
-     * Сумма для отправки в Satoshi
-     */
-    public string $sum_to_send_satoshi;
-
     public string $wallet_address;
     public int $exchanger_setting_model_id;
     protected ?string $step = 'requestWalletType';
@@ -181,10 +176,9 @@ class BTCConversation extends Conversation
         );
         $finalExchangerFee = bcsub($baseExchangerFee, $personalDiscount, 0);
 
-        $sumToSendSatoshi = (int) $amountSatoshi + $setting->network_fee; // сумма которая будет отправляться с кошеля
 
-        // сравнение итоговой суммы с резервом
-        $compareResult = bccomp($sumToSendSatoshi, $setting->balance);
+        // сравнение итоговой суммы которая нужна для отправки транзакции (получение + комиссия) с резервом
+        $compareResult = bccomp((int) $amountSatoshi + $setting->network_fee, $setting->balance);
 
         if($compareResult !== -1) {
             $this->bot->sendMessageWithSaveId(
@@ -194,11 +188,10 @@ class BTCConversation extends Conversation
             return;
         }
 
-        $sumToPaySatoshi = $sumToSendSatoshi + (int)$finalExchangerFee; // сумма которую нужно оплатить
+        $sumToPaySatoshi = (int) $amountSatoshi + $setting->network_fee + (int)$finalExchangerFee; // сумма которую нужно оплатить
 
         $this->amount = $amountSatoshi;
         $this->sum_to_pay_satoshi = $sumToPaySatoshi;
-        $this->sum_to_send_satoshi = $sumToSendSatoshi;
 
         $this->requestWalletAddress($bot);
     }
@@ -266,7 +259,7 @@ class BTCConversation extends Conversation
                 'exchanger_setting_id' => $setting->id,
                 'status' => \App\Enums\Order\StatusEnum::PENDING_PAYMENT->value,
                 'amount' => $this->amount,
-                'sum_to_send' => $this->sum_to_send_satoshi,
+                'network_fee' => $setting->network_fee,
                 'sum_to_pay' => $sumToPayRubWithKopecks,
                 'wallet_address' => $this->wallet_address,
             ]);
@@ -287,6 +280,6 @@ class BTCConversation extends Conversation
             userId: $bot->userId(),
             chatId: $bot->chatId(),
         );
-        VerifyOrderTimeoutJob::dispatch($order);
+//        VerifyOrderTimeoutJob::dispatch($order);
     }
 }
