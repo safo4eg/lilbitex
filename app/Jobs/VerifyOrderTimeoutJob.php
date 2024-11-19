@@ -21,12 +21,12 @@ class VerifyOrderTimeoutJob implements ShouldQueue
     public Order $order;
     public $backoff = 5;
     public $tries = 0;
-    public $orderTimeLimit = 5; // количество секунд которе может жить задача в статусе ожидания оплаты
+    public $orderTimeLimit = 300; // количество секунд которе может жить счет в статусе ожидания оплаты
 
     public function __construct(Order $order)
     {
         $this->order = $order;
-        $this->onQueue('order');
+        $this->onQueue('orders');
     }
 
     public function handle(): void
