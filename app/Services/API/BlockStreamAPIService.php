@@ -32,4 +32,81 @@ final class BlockStreamAPIService
             return -1;
         }
     }
+
+    /**
+     * Получить UTXO адреса
+     */
+    public function getAddressUTXO(string $address): int|array
+    {
+        try {
+            $response = Http::timeout(20)->get($this->url . '/address/' . $address . '/utxo');
+
+            if($response->ok() === false) {
+                throw new \Exception('Статус запроса списка UTXO !== 200');
+            }
+
+            return $response->json();
+        } catch (\Exception $e) {
+            return -1;
+        }
+    }
+
+    public function getScriptPubKey(string $txid, string $ownerAddress): int|string
+    {
+        try {
+            $response = Http::timeout(10)->get($this->url . '/tx/' . $txid);
+
+            if($response->ok() === false) {
+                throw new \Exception('Ошибка при получении информации по txid: статус !== 200');
+            }
+
+            if(!isset($response['vin'][0]['prevout']['scriptpubkey'])) {
+                throw new \Exception('Ошибка при получении информации по txid: отсутствует scriptpubkey');
+            }
+
+            $vouts = $response['vout'];
+            $scriptPubKey = '';
+            foreach ($vouts as $vout) {
+                if($vout['scriptpubkey_address'] === $ownerAddress) {
+                    $scriptPubKey = $vout['scriptpubkey'];
+                }
+            }
+
+            if(!empty($scriptPubKey)) {
+                return $scriptPubKey;
+            } else {
+                return -1;
+            }
+        } catch (\Exception $e) {
+            return -1;
+        }
+    }
+
+
+    /**
+     * Отправить биток
+     */
+    public function broadcastTransaction(string $hex): int|string
+    {
+        try {
+            $response = Http::timeout(10)->withHeaders([
+                'Content-Type' => 'text/plain',
+            ])
+                ->withBody($hex, 'text/plain')
+                ->post($this->url . '/tx');
+
+            if($response->successful()) {
+                $txid = $response->body();
+
+                Log::channel('single')->debug('TXID: ' . $txid);
+
+                return $txid;
+            } else {
+                throw new \Exception("Error broadcasting transaction: " . $response->body());
+            }
+        } catch (\Exception $e) {
+            Log::channel('single')->debug($e->getMessage());
+            return -1;
+        }
+    }
 }
