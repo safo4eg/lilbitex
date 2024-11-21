@@ -1,20 +1,30 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm
 
 WORKDIR /var/www
 
-RUN apk --no-cache add \
+# Устанавливаем необходимые пакеты для работы с PHP и зависимостями
+RUN apt-get update && apt-get install -y \
     bash \
     curl \
-    libpng-dev \
+    zip \
+    unzip \
+    tzdata \
     libzip-dev \
     libpq-dev \
-    zip unzip\
-    gmp-dev \
-    tzdata
+    libssl-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libsodium-dev \
+    libgmp-dev \
+    && apt-get clean
 
+# Устанавливаем необходимые PHP расширения
+RUN docker-php-ext-install pdo_mysql bcmath gd zip gmp opcache
 
-RUN docker-php-ext-install pdo_mysql bcmath gd zip gmp
-
+# Устанавливаем Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Создаём пользователя и группу www для приложения Laravel
@@ -27,6 +37,7 @@ COPY --chown=www:www . /var/www
 # Меняем пользователя на www
 USER www
 
+# Открываем порт 9000 для PHP-FPM
 EXPOSE 9000
 
 # Запуск PHP-FPM

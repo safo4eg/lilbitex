@@ -6,11 +6,19 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "laravel/framework": "^11.9",
-        "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.9",
-        "nutgram/laravel": "^1.4"
+        "laravel/framework": "11.9",
+        "laravel/sanctum": "4.0",
+        "laravel/tinker": "2.9",
+        "nutgram/laravel": "1.4",
+        "phpseclib/phpseclib": "^3.0",
+        "protonlabs/bitcoin": "dev-main"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ProtonMail/bitcoin-php"
+        }
+    ],
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "laravel/pint": "^1.13",
