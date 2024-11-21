@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Enums\Order\StatusEnum;
 use App\Exceptions\SilentVerifyOrderTimeoutJobException;
 use App\Models\Order;
-use App\Telegram\Conversations\Order\Buy\CancelledOrderMenu;
+use App\Telegram\Conversations\Order\Buy\UserCancelledOrderMenu;
 use App\Telegram\Services\BotService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -42,7 +42,7 @@ class VerifyOrderTimeoutJob implements ShouldQueue
                 $this->order->save();
 
                 BotService::clearBotHistory($bot, $this->order->user->chat_id);
-                CancelledOrderMenu::begin(
+                UserCancelledOrderMenu::begin(
                     bot: $bot,
                     userId: $this->order->user->chat_id,
                     chatId: $this->order->user->chat_id

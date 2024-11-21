@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 
-class CancelledOrderMenu extends InlineMenuWithSaveMessageId
+class UserCancelledOrderMenu extends InlineMenuWithSaveMessageId
 {
     public function start(Nutgram $bot)
     {
@@ -39,7 +39,7 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
         ];
 
         $this->menuText(
-            text: view('telegram.order.buy.cancelled-menu', $viewData),
+            text: view('telegram.order.buy.user-cancelled-menu', $viewData),
             opt: ['parse_mode' => ParseMode::HTML]
         )
             ->showMenu();

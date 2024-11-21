@@ -15,7 +15,7 @@ use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use App\Services\OrderService;
-use App\Telegram\Conversations\Order\Buy\PendingPaymentOrderMenu;
+use App\Telegram\Conversations\Order\Buy\UserPendingPaymentOrderMenu;
 use App\Telegram\Services\BotService;
 use Illuminate\Support\Facades\DB;
 use SergiX44\Nutgram\Conversations\Conversation;
@@ -24,7 +24,7 @@ use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class BTCConversation extends Conversation
+class UserBtcConversation extends Conversation
 {
     /**
      * Сумма к получению в сатоши
@@ -122,7 +122,7 @@ class BTCConversation extends Conversation
         ];
 
         $bot->sendMessageWithSaveId(
-            text: view('telegram.order.buy.amount', $viewData),
+            text: view('telegram.order.buy.user-amount', $viewData),
             parse_mode: ParseMode::HTML,
             chat_id: $bot->chatId()
         );
@@ -200,7 +200,7 @@ class BTCConversation extends Conversation
     {
         $setting = ExchangerSetting::where('id', $this->exchanger_setting_model_id)->first();
 
-        $message = view('telegram.order.buy.wallet-address', [
+        $message = view('telegram.order.buy.user-wallet-address', [
             'walletType' => WalletTypeEnum::getWalletTypesName()[$setting->wallet_type],
             'amountBTC' => BTCHelper::convertSatoshiToBTC($this->amount),
             'amountRUB' => BTCHelper::convertSatoshiToRub($this->amount, $setting->rate),
@@ -275,7 +275,7 @@ class BTCConversation extends Conversation
 
         $this->end();
         BotService::clearBotHistory($bot, $bot->userId());
-        PendingPaymentOrderMenu::begin(
+        UserPendingPaymentOrderMenu::begin(
             bot: $bot,
             userId: $bot->userId(),
             chatId: $bot->chatId(),

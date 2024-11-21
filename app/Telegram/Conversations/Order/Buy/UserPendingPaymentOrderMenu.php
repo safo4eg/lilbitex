@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 
-class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
+class UserPendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
 {
     public function start(Nutgram $bot)
     {
@@ -34,7 +34,7 @@ class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
             'sum' => $order->sum_to_pay
         ];
 
-        $this->menuText(text: view('telegram.order.buy.pending-payment-menu', $viewData))
+        $this->menuText(text: view('telegram.order.buy.user-pending-payment-menu', $viewData))
             ->showMenu();
     }
 

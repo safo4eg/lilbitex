@@ -52,7 +52,7 @@ $bot->group(function (Nutgram $bot) {
 //        $bot->sendMessage('обработка');
 //    });
 
-    $bot->onText(__('commands.start.menu.buy.btc'), Conversations\Order\Buy\BTCConversation::class);
+    $bot->onText(__('commands.start.menu.buy.btc'), Conversations\Order\Buy\UserBtcConversation::class);
 })
     ->middleware(EnsureUserChat::class)
     ->middleware(ClearBotHistory::class);
