@@ -42,7 +42,7 @@ final class BlockStreamAPIService
             $response = Http::timeout(20)->get($this->url . '/address/' . $address . '/utxo');
 
             if($response->ok() === false) {
-                throw new \Exception('Статус запроса списка UTXO !== 200');
+                throw new \Exception('Ошибка при получении UTXOs адреса');
             }
 
             return $response->json();
@@ -97,8 +97,6 @@ final class BlockStreamAPIService
 
             if($response->successful()) {
                 $txid = $response->body();
-
-                Log::channel('single')->debug('TXID: ' . $txid);
 
                 return $txid;
             } else {

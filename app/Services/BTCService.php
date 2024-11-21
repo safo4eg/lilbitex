@@ -102,8 +102,8 @@ final class BTCService
         try {
             $utxos = $this->block_stream_api->getAddressUTXO($this->exchanger_btc_address);
 
-            if ($utxos === -1) {
-                throw new \Exception('UTXO list is empty.');
+            if ($utxos === -1 || empty($utxos)) {
+                throw new \Exception('Ошибка со списком UTXO при созданиии и подписи транзакции.');
             }
 
             $totalInputSum = 0;
@@ -118,7 +118,7 @@ final class BTCService
             }
 
             if ($totalInputSum < $order->amount + $order->network_fee) {
-                throw new \Exception('Недостаточно средств на кошельке');
+                throw new \Exception('Сумма выбранных UTXO-входов меньше чем сумма получения с комиссей.');
             }
 
             $network = NetworkFactory::bitcoinTestnet(); // Для Testnet
@@ -153,7 +153,6 @@ final class BTCService
 
             return $signed->getHex();
         } catch (\Exception $e) {
-            Log::channel('single')->debug("MAIN LOG: " . $e->getMessage() . 'trace: ' . $e->getTraceAsString());
             return -1;
         }
     }
