@@ -22,6 +22,7 @@ return new class extends Migration
             $table->unsignedBigInteger('network_fee');
             $table->decimal('sum_to_pay', 12, 2);
             $table->string('wallet_address', 128);
+            $table->string('txid', 64)->unique();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')
