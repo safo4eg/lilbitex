@@ -129,4 +129,5 @@ return [
     'api_key' => env('API_KEY'),
 
     'exchanger_btc_address' => env('EXCHANGER_BTC_ADDRESS', 'n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1'),
+    'exchanger_btc_private_key' => env('EXCHANGER_BTC_PRIVATE_KEY', 'cU9Jw4dXrWcdZFjG92a9UM6dzVWjCbd9JhBVmQf96tqi9WZhc7dt'),
 ];

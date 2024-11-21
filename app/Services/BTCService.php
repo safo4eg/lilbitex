@@ -3,20 +3,29 @@
 namespace App\Services;
 
 use App\Helpers\BTCHelper;
-use App\Models\ExchangerSetting;
+use App\Models\Order;
 use App\Services\API\BlockStreamAPIService;
+use BitWasp\Bitcoin\Address\AddressCreator;
+use BitWasp\Bitcoin\Key\Factory\PrivateKeyFactory;
+use BitWasp\Bitcoin\Network\NetworkFactory;
+use BitWasp\Bitcoin\Script\ScriptFactory;
+use BitWasp\Bitcoin\Transaction\TransactionFactory;
+use BitWasp\Bitcoin\Transaction\TransactionOutput;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use BitWasp\Bitcoin\Transaction\Factory\Signer;
 
 final class BTCService
 {
     private string $exchanger_btc_address;
+    private string $exchanger_btc_private_key;
 
     private BlockStreamAPIService $block_stream_api;
 
     public function __construct(BlockStreamAPIService $blockStreamAPI)
     {
         $this->exchanger_btc_address = config('app.exchanger_btc_address');
+        $this->exchanger_btc_private_key = config('app.exchanger_btc_private_key');
         $this->block_stream_api = $blockStreamAPI;
     }
 
@@ -81,6 +90,70 @@ final class BTCService
 
             return $btc_to_rub;
         } catch (\Exception $e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Отправить биток и завершить обмен
+     */
+    public function createSignedTransaction(Order $order): int|string
+    {
+        try {
+            $utxos = $this->block_stream_api->getAddressUTXO($this->exchanger_btc_address);
+
+            if ($utxos === -1) {
+                throw new \Exception('UTXO list is empty.');
+            }
+
+            $totalInputSum = 0;
+            $selectedUtxos = [];
+
+            foreach ($utxos as $utxo) {
+                $selectedUtxos[] = $utxo;
+                $totalInputSum += $utxo['value'];
+                if ($totalInputSum >= $order->amount + $order->network_fee) {
+                    break;
+                }
+            }
+
+            if ($totalInputSum < $order->amount + $order->network_fee) {
+                throw new \Exception('Недостаточно средств на кошельке');
+            }
+
+            $network = NetworkFactory::bitcoinTestnet(); // Для Testnet
+            // $network = NetworkFactory::bitcoin(); // Для Mainnet
+            $privateKeyFactory = new PrivateKeyFactory();
+            $privateKey = $privateKeyFactory->fromWif($this->exchanger_btc_private_key, $network);
+            $addressCreator = new AddressCreator();
+
+            $transactionBuilder = TransactionFactory::build();
+            foreach ($selectedUtxos as $utxo) {
+                $transactionBuilder->input($utxo['txid'], $utxo['vout']);
+            }
+
+            $transactionBuilder->payToAddress($order->amount, $addressCreator->fromString($order->wallet_address, $network));
+            $change = $totalInputSum - $order->amount - $order->network_fee;
+            // если есть сдача, то добавляем еще output
+            if($change > 0) {
+                $transactionBuilder->payToAddress($change, $addressCreator->fromString($this->exchanger_btc_address, $network));
+            }
+
+            $transaction = $transactionBuilder->get();
+            $signer = new Signer($transaction);
+            foreach ($selectedUtxos as $index => $utxo) {
+                $txOut = new TransactionOutput(
+                    $utxo['value'],
+                    ScriptFactory::scriptPubKey()->payToPubKeyHash($privateKey->getPubKeyHash())
+                );
+                $input = $signer->input($index, $txOut);
+                $input->sign($privateKey);
+            }
+            $signed = $signer->get();
+
+            return $signed->getHex();
+        } catch (\Exception $e) {
+            Log::channel('single')->debug("MAIN LOG: " . $e->getMessage() . 'trace: ' . $e->getTraceAsString());
             return -1;
         }
     }
