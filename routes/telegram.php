@@ -1,6 +1,8 @@
 <?php
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
+use Illuminate\Support\Facades\Log;
+use phpseclib3\Crypt\EC;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use \App\Telegram\Middleware\EnsureUserChat;
@@ -37,11 +39,9 @@ $bot->group(function (Nutgram $bot) {
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
 
-    $bot->onCommand('test', function (Nutgram $bot, \App\Services\API\MempoolSpaceAPIService $mempoolSpaceAPIService) {
-        $res = $mempoolSpaceAPIService->validateAddress('n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1');
-
-        if($res) $bot->sendMessage('корректный');
-        else $bot->sendMessage('некорректный');
+    $bot->onCommand('test', function (Nutgram $bot, \App\Services\API\BlockStreamAPIService $blockStreamAPIService) {
+        $res = $blockStreamAPIService->getAddressUTXO('n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1');
+        Log::channel('single')->debug($res);
     });
 
 //    $bot->onMessage(function (Nutgram $bot, \App\Services\BTCService $BTCService) {
