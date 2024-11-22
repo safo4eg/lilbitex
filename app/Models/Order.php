@@ -17,7 +17,8 @@ class Order extends Model
     protected function casts(): array
     {
         return [
-            'sum_to_pay' => 'string'
+            'sum_to_pay' => 'string',
+            'last_transaction_check' => 'datetime:d.m.Y H:i',
         ];
     }
 

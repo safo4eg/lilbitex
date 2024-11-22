@@ -39,10 +39,7 @@ $bot->group(function (Nutgram $bot) {
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
 
-    $bot->onCommand('test', function (Nutgram $bot, \App\Services\API\BlockStreamAPIService $blockStreamAPIService) {
-        $res = $blockStreamAPIService->getAddressUTXO('n3RGTBgLrv9pa1girPGaytTX8Suz5q2JS1');
-        Log::channel('single')->debug($res);
-    });
+    $bot->onCommand('test', Conversations\ChooseColorMenu::class);
 
 //    $bot->onMessage(function (Nutgram $bot, \App\Services\BTCService $BTCService) {
 //        $text = $bot->message()->text;

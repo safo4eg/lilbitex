@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('sum_to_pay', 12, 2);
             $table->string('wallet_address', 128);
             $table->string('txid', 64)->unique()->nullable();
+            $table->timestamp('last_transaction_check')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')

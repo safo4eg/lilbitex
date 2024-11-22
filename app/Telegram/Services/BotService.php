@@ -105,7 +105,7 @@ class BotService
                 message_ids: $messageIds
             );
 
-            $bot->setUserData('user.message_ids', $messageIds, $chatId);
+            $bot->setUserData('user.message_ids', null, $chatId);
         }
     }
 }
