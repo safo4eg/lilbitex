@@ -28,7 +28,8 @@ RUN docker-php-ext-install pdo_mysql bcmath gd zip gmp opcache
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Создаём пользователя и группу www для приложения Laravel
-RUN addgroup --gid 1000 www && adduser --uid 1000 --ingroup www --shell /bin/sh --disabled-password --home /home/www www
+RUN groupadd -g 1000 www \
+    && useradd -u 1000 -g www -s /bin/bash -m www
 
 # Копируем содержимое текущего каталога в рабочую директорию
 COPY . /var/www
