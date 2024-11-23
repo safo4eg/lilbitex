@@ -18,23 +18,20 @@ class BankNotificationController extends Controller
 {
     public function __invoke(Request $request, BTCService $service, BlockStreamAPIService $blockStreamAPIService)
     {
-        Log::channel('single')->debug($request->all());
-
         // получаем сумму
-        $amount = $request->getContent();
-        Log::channel('single')->debug($amount);
-
+        $notification = $request->getContent();
+        $cleanedNotification = $this->cleanNotification($notification);
+        $notificationData = json_decode($cleanedNotification, true);
+        $amount = $this->extractAmount($notificationData['text']);
         $order = Order::with('user:id,chat_id')
             ->where('status', StatusEnum::PENDING_PAYMENT->value)
             ->where('sum_to_pay', $amount)
             ->first();
 
         if($order) {
-            Log::channel('single')->debug('test');
-            $order->update([
-                'status' => StatusEnum::PENDING_EXCHANGE->value,
-                'last_transaction_check' => now()
-            ]);
+            $order->status = StatusEnum::PENDING_EXCHANGE;
+            $order->last_transaction_check = now();
+            $order->save();
 
             $bot = app(Nutgram::class);
 
@@ -49,9 +46,7 @@ class BankNotificationController extends Controller
             $txHex = $service->createSignedTransaction($order);
 
             if($txHex === -1) {
-                // не удалось создать и подписать транзакцию:
-                // очистка сообщения пользователя
-                // показ InlineMenu
+                Log::channel('single')->debug('не удалось подписать транзу');
             }
 
             $txid = $blockStreamAPIService->broadcastTransaction($txHex);
@@ -65,7 +60,32 @@ class BankNotificationController extends Controller
                 'status' => StatusEnum::COMPLETED
             ]);
         }
-//
+
         return response()->noContent(200);
+    }
+
+    /**
+     * Очистить приходящий текст от лишних символов
+     */
+    private function cleanNotification(string $notification): string
+    {
+        $notification = preg_replace('/[^\P{C}\x{20}-\x{10FFFF}]/u', '', $notification);
+        $notification = preg_replace('/\x{A0}/u', ' ', $notification);
+        $notification = preg_replace('/\s{2,}/u', '', $notification);
+        $notification = str_replace('�', '', $notification);
+        return $notification;
+    }
+
+    /**
+     * Извлекает сумму пополенения из уведомления
+     * @return ?array - где 0 - целая часть (amount и order), 1 - копейки
+     */
+    private function extractAmount(string $notificationText): ?string
+    {
+        if (preg_match('/Пополнение.*?(\d+(?:,\d{2})?)\s*₽/', $notificationText, $matches)) {
+            return str_replace(',', '.', $matches[1]);
+        }
+
+        return null;
     }
 }

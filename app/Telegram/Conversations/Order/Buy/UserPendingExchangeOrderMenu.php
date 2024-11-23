@@ -29,7 +29,7 @@ class UserPendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
         $order = Order::whereHas('user', function (Builder $query) {
             $query->where('chat_id', $this->chatId);
         })
-            ->where('status', StatusEnum::PENDING_EXCHANGE)
+            ->where('status', StatusEnum::PENDING_EXCHANGE->value)
             ->latest()
             ->first();
 
@@ -61,7 +61,11 @@ class UserPendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
         $order = Order::find($this->order_id);
 
         if($order->status === StatusEnum::COMPLETED->value) {
-            // отправка на последнее инлайн меню
+            UserCompletedOrderMenu::begin(
+                bot: $bot,
+                userId: $bot->userId(),
+                chatId: $bot->userId()
+            );
         } else {
             $order->update(['last_transaction_check' => Carbon::now()]);
             $this->clearButtons();
