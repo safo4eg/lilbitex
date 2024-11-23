@@ -10,15 +10,8 @@
         "laravel/sanctum": "4.0",
         "laravel/tinker": "2.9",
         "nutgram/laravel": "1.4",
-        "phpseclib/phpseclib": "^3.0",
-        "protonlabs/bitcoin": "dev-main"
+        "protonlabs/bitcoin": "^1.0"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/ProtonMail/bitcoin-php"
-        }
-    ],
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "laravel/pint": "^1.13",
