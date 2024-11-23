@@ -18,7 +18,7 @@ class Order extends Model
     {
         return [
             'sum_to_pay' => 'string',
-            'last_transaction_check' => 'datetime:d.m.Y H:i',
+            'last_transaction_check' => 'datetime',
         ];
     }
 
