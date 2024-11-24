@@ -2,8 +2,8 @@
 
 namespace App\Telegram\Commands\User;
 
-use App\Telegram\Conversations\Order\Buy\UserPendingPaymentOrderMenu;
 use App\Telegram\Conversations\Order\OrderBuyShowMenu;
+use App\Telegram\Conversations\User\UserPendingPaymentOrderMenu;
 use SergiX44\Nutgram\Handlers\Type\Command;
 use SergiX44\Nutgram\Nutgram;
 

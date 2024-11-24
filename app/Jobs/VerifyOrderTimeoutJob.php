@@ -5,13 +5,10 @@ namespace App\Jobs;
 use App\Enums\Order\StatusEnum;
 use App\Exceptions\SilentVerifyOrderTimeoutJobException;
 use App\Models\Order;
-use App\Telegram\Conversations\Order\Buy\UserCancelledOrderMenu;
+use App\Telegram\Conversations\User\UserCancelledOrderMenu;
 use App\Telegram\Services\BotService;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 
 class VerifyOrderTimeoutJob implements ShouldQueue

@@ -1,17 +1,16 @@
 <?php
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
-use Illuminate\Support\Facades\Log;
+use App\Telegram\Commands\User\OrderCommand;
+use App\Telegram\Commands\User\StartCommand;
+use App\Telegram\Conversations;
+use App\Telegram\Middleware\ClearBotHistory;
+use App\Telegram\Middleware\EnsureManagerChat;
+use App\Telegram\Middleware\EnsureUserChat;
+use App\Telegram\Middleware\SaveLastUserMessageId;
 use phpseclib3\Crypt\EC;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
-use \App\Telegram\Middleware\EnsureUserChat;
-use \App\Telegram\Middleware\EnsureManagerChat;
-use App\Telegram\Commands\User\StartCommand;
-use App\Telegram\Commands\User\OrderCommand;
-use \App\Telegram\Conversations;
-use \App\Telegram\Middleware\SaveLastUserMessageId;
-use \App\Telegram\Middleware\ClearBotHistory;
 
 Conversation::refreshOnDeserialize();
 
@@ -49,7 +48,7 @@ $bot->group(function (Nutgram $bot) {
 //        $bot->sendMessage('обработка');
 //    });
 
-    $bot->onText(__('commands.start.menu.buy.btc'), Conversations\Order\Buy\UserBtcConversation::class);
+    $bot->onText(__('commands.start.menu.buy.btc'), Conversations\User\UserBtcConversation::class);
 })
     ->middleware(EnsureUserChat::class)
     ->middleware(ClearBotHistory::class);
