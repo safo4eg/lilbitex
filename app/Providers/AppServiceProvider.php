@@ -8,6 +8,7 @@ use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use App\Services\OrderService;
 use App\Telegram\Services\BotService;
+use App\Telegram\Services\ManagerService;
 use Illuminate\Support\ServiceProvider;
 use SergiX44\Nutgram\Nutgram;
 
@@ -39,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(OrderService::class, function () {
             return new OrderService();
+        });
+
+        $this->app->singleton(ManagerService::class, function () {
+            return new ManagerService();
         });
     }
 

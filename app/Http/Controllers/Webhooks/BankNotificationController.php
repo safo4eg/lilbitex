@@ -2,21 +2,27 @@
 
 namespace App\Http\Controllers\Webhooks;
 
+use App\Enums\Order\ManagerPendingExchangeTypeEnum;
 use App\Enums\Order\StatusEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AmountRequest;
 use App\Models\Order;
 use App\Services\API\BlockStreamAPIService;
 use App\Services\BTCService;
-use App\Telegram\Conversations\Order\Buy\UserPendingExchangeOrderMenu;
+use App\Telegram\Conversations\User\UserPendingExchangeOrderMenu;
 use App\Telegram\Services\BotService;
+use App\Telegram\Services\ManagerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 
 class BankNotificationController extends Controller
 {
-    public function __invoke(Request $request, BTCService $service, BlockStreamAPIService $blockStreamAPIService)
+    public function __invoke(
+        Request $request,
+        BTCService $service,
+        BlockStreamAPIService $blockStreamAPIService,
+        ManagerService $managerService
+    )
     {
         // получаем сумму
         $notification = $request->getContent();
@@ -46,13 +52,22 @@ class BankNotificationController extends Controller
             $txHex = $service->createSignedTransaction($order);
 
             if($txHex === -1) {
-                Log::channel('single')->debug('не удалось подписать транзу');
+                $managerService->showPendingExchangeOrderMenu(
+                    $order->id,
+                    ManagerPendingExchangeTypeEnum::TRANSACTION_CREATE_ERROR->value
+                );
+                return response()->noContent(200);
             }
+
 
             $txid = $blockStreamAPIService->broadcastTransaction($txHex);
 
             if($txid === -1) {
-//                 не удалось отправить транзакцию в сеть
+                $managerService->showPendingExchangeOrderMenu(
+                    $order->id,
+                    ManagerPendingExchangeTypeEnum::TRANSACTION_SEND_ERROR->value
+                );
+                return response()->noContent(200);
             }
 
             $order->update([
