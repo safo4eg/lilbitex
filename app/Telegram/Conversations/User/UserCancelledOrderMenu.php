@@ -3,7 +3,7 @@
  * Здесь используем по максимуму данные из БД
  * Потому что при тригере на стороне сервера $bot бдет пустой!
  */
-namespace App\Telegram\Conversations\Order\Buy;
+namespace App\Telegram\Conversations\User;
 
 use App\Enums\Order\StatusEnum;
 use App\Enums\WalletTypeEnum;
@@ -39,7 +39,7 @@ class UserCancelledOrderMenu extends InlineMenuWithSaveMessageId
         ];
 
         $this->menuText(
-            text: view('telegram.order.buy.user-cancelled-menu', $viewData),
+            text: view('telegram.user.cancelled-menu', $viewData),
             opt: ['parse_mode' => ParseMode::HTML]
         )
             ->showMenu();

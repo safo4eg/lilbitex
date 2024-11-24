@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Telegram\Conversations\Order\Buy;
+namespace App\Telegram\Conversations\User;
 
 use App\Enums\Order\StatusEnum;
 use App\Enums\WalletTypeEnum;
@@ -8,17 +8,17 @@ use App\Helpers\BTCHelper;
 use App\Models\Order;
 use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 
-class UserPendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
+class UserCompletedOrderMenu extends InlineMenuWithSaveMessageId
 {
     public function start(Nutgram $bot)
     {
-        $order = Order::whereHas('user', function (Builder $query) use($bot) {
-            $query->where('chat_id', $bot->userId());
+        $order = Order::whereHas('user', function (Builder $query) {
+            $query->where('chat_id', $this->chatId);
         })
-            ->where('status', StatusEnum::PENDING_PAYMENT->value)
+            ->where('status', StatusEnum::COMPLETED->value)
             ->latest()
             ->first();
 
@@ -28,21 +28,23 @@ class UserPendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
             'walletAddress' => $order->wallet_address,
             'amountBTC' => BTCHelper::convertSatoshiToBTC($order->amount),
             'amountRUB' => BTCHelper::convertSatoshiToRub($order->amount, $order->setting->rate),
-            'bankName' => $order->requisite->bank_name,
-            'phone' => $order->requisite->phone,
-            'initials' => $order->requisite->initials,
-            'sum' => $order->sum_to_pay
+            'txid' => $order->txid,
+
         ];
 
-        $this->menuText(text: view('telegram.order.buy.user-pending-payment-menu', $viewData))
+        $this->menuText(text: view('telegram.user.completed-menu', $viewData))
+            ->addButtonRow(
+                InlineKeyboardButton::make(
+                    text: 'Отследить транзакцию',
+                    url: "https://mempool.space/ru/testnet/tx/{$order->txid}"
+                )
+            )
+            ->orNext('none')
             ->showMenu();
     }
 
-
-    // будет вызываться если не нажата кнопка
     public function none(Nutgram $bot)
     {
-        $bot->sendMessage('Bye!');
-        $this->end();
+        $bot->deleteMessage($this->chatId, $bot->messageId());
     }
 }

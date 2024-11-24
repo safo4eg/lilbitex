@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Telegram\Conversations\Order\Buy;
+namespace App\Telegram\Conversations\User;
 
 use App\Enums\AssetEnum;
 use App\Enums\Order\TypeEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
-use App\Jobs\VerifyOrderTimeoutJob;
 use App\Models\ExchangerSetting;
 use App\Models\Order;
 use App\Models\Requisite;
@@ -15,7 +14,6 @@ use App\Services\API\MempoolSpaceAPIService;
 use App\Services\BTCService;
 use App\Services\ExchangerSettingService;
 use App\Services\OrderService;
-use App\Telegram\Conversations\Order\Buy\UserPendingPaymentOrderMenu;
 use App\Telegram\Services\BotService;
 use Illuminate\Support\Facades\DB;
 use SergiX44\Nutgram\Conversations\Conversation;
@@ -122,7 +120,7 @@ class UserBtcConversation extends Conversation
         ];
 
         $bot->sendMessageWithSaveId(
-            text: view('telegram.order.buy.user-amount', $viewData),
+            text: view('telegram.user.amount', $viewData),
             parse_mode: ParseMode::HTML,
             chat_id: $bot->chatId()
         );
@@ -200,7 +198,7 @@ class UserBtcConversation extends Conversation
     {
         $setting = ExchangerSetting::where('id', $this->exchanger_setting_model_id)->first();
 
-        $message = view('telegram.order.buy.user-wallet-address', [
+        $message = view('telegram.user.wallet-address', [
             'walletType' => WalletTypeEnum::getWalletTypesName()[$setting->wallet_type],
             'amountBTC' => BTCHelper::convertSatoshiToBTC($this->amount),
             'amountRUB' => BTCHelper::convertSatoshiToRub($this->amount, $setting->rate),

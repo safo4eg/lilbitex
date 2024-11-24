@@ -1,18 +1,16 @@
 <?php
 
-namespace App\Telegram\Conversations\Order\Buy;
+namespace App\Telegram\Conversations\User;
 
 use App\Enums\Order\StatusEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
-use App\Services\BTCService;
 use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
 use App\Telegram\Services\BotService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use SergiX44\Nutgram\Nutgram;
 use Illuminate\Database\Eloquent\Builder;
+use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 
 class UserPendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
@@ -44,7 +42,7 @@ class UserPendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
             'lastTransactionCheck' => $order->last_transaction_check,
         ];
 
-        $this->menuText(text: view('telegram.order.buy.user-pending-exchange-menu', $viewData))
+        $this->menuText(text: view('telegram.user.pending-exchange-menu', $viewData))
             ->addButtonRow(
                 InlineKeyboardButton::make(
                     text: 'Обновить',
