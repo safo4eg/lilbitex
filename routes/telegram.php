@@ -21,8 +21,14 @@ $bot->middleware(SaveLastUserMessageId::class);
 $bot->group(function (Nutgram $bot) {
     $bot->onCommand('manager', function (Nutgram $bot) {
        return $bot->sendMessage('Команда в чате менеджеров');
-    });
-})->middleware(EnsureManagerChat::class);
+    })->skipGlobalMiddlewares();
+
+    // обработка кнопки "Отрпавить биток"
+    $bot->onCallbackQueryData('/btc/send/:{orderId}/:{typeValue}', \App\Telegram\Handlers\Manager\SendBitcoinHandler::class)
+        ->whereNumber('orderId')
+        ->whereNumber('typeValue');
+})
+    ->middleware(EnsureManagerChat::class);
 
 // обработка приватных чатов
 $bot->group(function (Nutgram $bot) {
@@ -41,8 +47,9 @@ $bot->group(function (Nutgram $bot) {
     $bot->onCommand('test', Conversations\ChooseColorMenu::class);
 
     $bot->onText(__('commands.start.menu.buy.btc'), Conversations\User\BtcConversation::class);
+
+    // дл логирования сообщений пользователя
+    $bot->onMessage(function (Nutgram $bot) {});
 })
     ->middleware(EnsureUserChat::class)
     ->middleware(ClearBotHistory::class);
-
-$bot->onMessage(function (Nutgram $bot) {}); // нужно для логирования сообщений пользователя, иначе не сохраняются id

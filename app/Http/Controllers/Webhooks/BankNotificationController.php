@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\API\BlockStreamAPIService;
 use App\Services\BTCService;
-use App\Telegram\Conversations\User\UserPendingExchangeOrderMenu;
+use App\Telegram\Conversations\User\PendingExchangeOrderMenu;
 use App\Telegram\Services\BotService;
 use App\Telegram\Services\ManagerService;
 use Illuminate\Http\Request;
@@ -29,6 +29,11 @@ class BankNotificationController extends Controller
         $cleanedNotification = $this->cleanNotification($notification);
         $notificationData = json_decode($cleanedNotification, true);
         $amount = $this->extractAmount($notificationData['text']);
+
+        Log::channel('single')->debug($cleanedNotification);
+        Log::channel('single')->debug($notificationData);
+        Log::channel('single')->debug($amount);
+
         $order = Order::with('user:id,chat_id')
             ->where('status', StatusEnum::PENDING_PAYMENT->value)
             ->where('sum_to_pay', $amount)
@@ -43,16 +48,16 @@ class BankNotificationController extends Controller
 
             // отправка меню пользователю
             BotService::clearBotHistory($bot, $order->user->chat_id);
-            UserPendingExchangeOrderMenu::begin(
+            PendingExchangeOrderMenu::begin(
                 bot: $bot,
                 userId: $order->user->chat_id,
                 chatId: $order->user->chat_id
             );
 
-            $txHex = $service->createSignedTransaction($order);
-
+//            $txHex = $service->createSignedTransaction($order);
+            $txHex = -1;
             if($txHex === -1) {
-                $managerService->showPendingExchangeOrderMenu(
+                $managerService->showSendBitcoinMessage(
                     $order->id,
                     ManagerPendingExchangeTypeEnum::TRANSACTION_CREATE_ERROR->value
                 );
@@ -63,7 +68,7 @@ class BankNotificationController extends Controller
             $txid = $blockStreamAPIService->broadcastTransaction($txHex);
 
             if($txid === -1) {
-                $managerService->showPendingExchangeOrderMenu(
+                $managerService->showSendBitcoinMessage(
                     $order->id,
                     ManagerPendingExchangeTypeEnum::TRANSACTION_SEND_ERROR->value
                 );
