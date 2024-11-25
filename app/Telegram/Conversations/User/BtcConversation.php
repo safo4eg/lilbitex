@@ -22,7 +22,7 @@ use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class UserBtcConversation extends Conversation
+class BtcConversation extends Conversation
 {
     /**
      * Сумма к получению в сатоши
@@ -273,7 +273,7 @@ class UserBtcConversation extends Conversation
 
         $this->end();
         BotService::clearBotHistory($bot, $bot->userId());
-        UserPendingPaymentOrderMenu::begin(
+        PendingPaymentOrderMenu::begin(
             bot: $bot,
             userId: $bot->userId(),
             chatId: $bot->chatId(),

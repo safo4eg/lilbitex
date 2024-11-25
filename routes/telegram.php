@@ -40,15 +40,7 @@ $bot->group(function (Nutgram $bot) {
 
     $bot->onCommand('test', Conversations\ChooseColorMenu::class);
 
-//    $bot->onMessage(function (Nutgram $bot, \App\Services\BTCService $BTCService) {
-//        $text = $bot->message()->text;
-//
-//        $BTCService->validateAmountFormat($text);
-//
-//        $bot->sendMessage('обработка');
-//    });
-
-    $bot->onText(__('commands.start.menu.buy.btc'), Conversations\User\UserBtcConversation::class);
+    $bot->onText(__('commands.start.menu.buy.btc'), Conversations\User\BtcConversation::class);
 })
     ->middleware(EnsureUserChat::class)
     ->middleware(ClearBotHistory::class);

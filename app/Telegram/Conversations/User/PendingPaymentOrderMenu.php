@@ -9,16 +9,15 @@ use App\Models\Order;
 use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
 use Illuminate\Database\Eloquent\Builder;
 use SergiX44\Nutgram\Nutgram;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 
-class UserCompletedOrderMenu extends InlineMenuWithSaveMessageId
+class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
 {
     public function start(Nutgram $bot)
     {
-        $order = Order::whereHas('user', function (Builder $query) {
-            $query->where('chat_id', $this->chatId);
+        $order = Order::whereHas('user', function (Builder $query) use($bot) {
+            $query->where('chat_id', $bot->userId());
         })
-            ->where('status', StatusEnum::COMPLETED->value)
+            ->where('status', StatusEnum::PENDING_PAYMENT->value)
             ->latest()
             ->first();
 
@@ -28,23 +27,21 @@ class UserCompletedOrderMenu extends InlineMenuWithSaveMessageId
             'walletAddress' => $order->wallet_address,
             'amountBTC' => BTCHelper::convertSatoshiToBTC($order->amount),
             'amountRUB' => BTCHelper::convertSatoshiToRub($order->amount, $order->setting->rate),
-            'txid' => $order->txid,
-
+            'bankName' => $order->requisite->bank_name,
+            'phone' => $order->requisite->phone,
+            'initials' => $order->requisite->initials,
+            'sum' => $order->sum_to_pay
         ];
 
-        $this->menuText(text: view('telegram.user.completed-menu', $viewData))
-            ->addButtonRow(
-                InlineKeyboardButton::make(
-                    text: 'Отследить транзакцию',
-                    url: "https://mempool.space/ru/testnet/tx/{$order->txid}"
-                )
-            )
-            ->orNext('none')
+        $this->menuText(text: view('telegram.user.pending-payment-menu', $viewData))
             ->showMenu();
     }
 
+
+    // будет вызываться если не нажата кнопка
     public function none(Nutgram $bot)
     {
-        $bot->deleteMessage($this->chatId, $bot->messageId());
+        $bot->sendMessage('Bye!');
+        $this->end();
     }
 }

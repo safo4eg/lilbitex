@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 
-class UserCancelledOrderMenu extends InlineMenuWithSaveMessageId
+class CancelledOrderMenu extends InlineMenuWithSaveMessageId
 {
     public function start(Nutgram $bot)
     {
