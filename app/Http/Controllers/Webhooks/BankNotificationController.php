@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Webhooks;
 
-use App\Enums\Order\ManagerPendingExchangeTypeEnum;
+use App\Enums\Order\BitcoinResendReasonEnum;
 use App\Enums\Order\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -19,9 +19,7 @@ class BankNotificationController extends Controller
 {
     public function __invoke(
         Request $request,
-        BTCService $service,
-        BlockStreamAPIService $blockStreamAPIService,
-        ManagerService $managerService
+        BTCService $BTCService,
     )
     {
         // получаем сумму
@@ -29,10 +27,6 @@ class BankNotificationController extends Controller
         $cleanedNotification = $this->cleanNotification($notification);
         $notificationData = json_decode($cleanedNotification, true);
         $amount = $this->extractAmount($notificationData['text']);
-
-        Log::channel('single')->debug($cleanedNotification);
-        Log::channel('single')->debug($notificationData);
-        Log::channel('single')->debug($amount);
 
         $order = Order::with('user:id,chat_id')
             ->where('status', StatusEnum::PENDING_PAYMENT->value)
@@ -54,31 +48,8 @@ class BankNotificationController extends Controller
                 chatId: $order->user->chat_id
             );
 
-//            $txHex = $service->createSignedTransaction($order);
-            $txHex = -1;
-            if($txHex === -1) {
-                $managerService->showSendBitcoinMessage(
-                    $order->id,
-                    ManagerPendingExchangeTypeEnum::TRANSACTION_CREATE_ERROR->value
-                );
-                return response()->noContent(200);
-            }
+            $BTCService->sendBitcoin($order);
 
-
-            $txid = $blockStreamAPIService->broadcastTransaction($txHex);
-
-            if($txid === -1) {
-                $managerService->showSendBitcoinMessage(
-                    $order->id,
-                    ManagerPendingExchangeTypeEnum::TRANSACTION_SEND_ERROR->value
-                );
-                return response()->noContent(200);
-            }
-
-            $order->update([
-                'txid' => $txid,
-                'status' => StatusEnum::COMPLETED
-            ]);
         }
 
         return response()->noContent(200);

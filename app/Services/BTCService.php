@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Enums\Order\BitcoinResendReasonEnum;
+use App\Enums\Order\StatusEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
 use App\Services\API\BlockStreamAPIService;
+use App\Telegram\Services\ManagerService;
 use BitWasp\Bitcoin\Address\AddressCreator;
 use BitWasp\Bitcoin\Key\Factory\PrivateKeyFactory;
 use BitWasp\Bitcoin\Network\NetworkFactory;
@@ -21,12 +24,17 @@ final class BTCService
     private string $exchanger_btc_private_key;
 
     private BlockStreamAPIService $block_stream_api;
+    private ManagerService $manager_service;
 
-    public function __construct(BlockStreamAPIService $blockStreamAPI)
+    public function __construct(
+        BlockStreamAPIService $blockStreamAPI,
+        ManagerService $managerService
+    )
     {
         $this->exchanger_btc_address = config('app.exchanger_btc_address');
         $this->exchanger_btc_private_key = config('app.exchanger_btc_private_key');
         $this->block_stream_api = $blockStreamAPI;
+        $this->manager_service = $managerService;
     }
 
     /**
@@ -155,5 +163,34 @@ final class BTCService
         } catch (\Exception $e) {
             return -1;
         }
+    }
+
+    /**
+     * Создать, подписать и отправить биток
+     */
+    public function sendBitcoin(Order $order): void
+    {
+//        $txHex = $this->createSignedTransaction($order);
+        $txHex = -1;
+        if($txHex === -1) {
+            $this->manager_service->showSendBitcoinMessage(
+                $order->id,
+                BitcoinResendReasonEnum::TRANSACTION_CREATE_ERROR->value
+            );
+            return;
+        }
+
+        $txid = $this->block_stream_api->sendTransaction($txHex);
+
+        if($txid === -1) {
+            $this->manager_service->showSendBitcoinMessage(
+                $order->id,
+                BitcoinResendReasonEnum::TRANSACTION_SEND_ERROR->value
+            );
+            return;
+        }
+
+        $order->txid = $txid;
+        $order->status = StatusEnum::COMPLETED->value;
     }
 }

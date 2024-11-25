@@ -28,7 +28,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(BTCService::class, function () {
-            return new BTCService($this->app->make(BlockStreamAPIService::class));
+            return new BTCService(
+                $this->app->make(BlockStreamAPIService::class),
+                $this->app->make(ManagerService::class),
+            );
         });
 
         $this->app->singleton(ExchangerSettingService::class, function () {

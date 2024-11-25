@@ -2,7 +2,7 @@
 
 namespace App\Enums\Order;
 
-enum ManagerPendingExchangeTypeEnum: int
+enum BitcoinResendReasonEnum: int
 {
     CASE TRANSACTION_CREATE_ERROR = 1;
     CASE TRANSACTION_SEND_ERROR = 2;

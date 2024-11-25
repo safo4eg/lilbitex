@@ -86,7 +86,7 @@ final class BlockStreamAPIService
     /**
      * Отправить биток
      */
-    public function broadcastTransaction(string $hex): int|string
+    public function sendTransaction(string $hex): int|string
     {
         try {
             $response = Http::timeout(10)->withHeaders([

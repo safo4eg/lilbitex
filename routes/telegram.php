@@ -8,7 +8,6 @@ use App\Telegram\Middleware\ClearBotHistory;
 use App\Telegram\Middleware\EnsureManagerChat;
 use App\Telegram\Middleware\EnsureUserChat;
 use App\Telegram\Middleware\SaveLastUserMessageId;
-use phpseclib3\Crypt\EC;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 
