@@ -14,4 +14,12 @@ enum WalletTypeEnum: int
             self::EXTERNAL->value => 'Внешний BTC'
         ];
     }
+
+    public static function  getBTCWalletTypesName(): array
+    {
+        return [
+            self::BIGMAFIA->value => 'Bigmafia BTC',
+            self::EXTERNAL->value => 'Внешний BTC'
+        ];
+    }
 }

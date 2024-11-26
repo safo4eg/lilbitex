@@ -15,7 +15,6 @@ class SendBitcoinHandler
 
         if($typeValue === BitcoinResendReasonEnum::CHECK_PAYMENT_AND_SEND_BITCOIN->value) {
             // просьба подтвердить действие
-            return;
         } else {
             $bot->deleteMessage(
                 chat_id: $bot->chatId(),

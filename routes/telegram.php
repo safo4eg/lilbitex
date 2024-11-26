@@ -22,10 +22,15 @@ $bot->group(function (Nutgram $bot) {
        return $bot->sendMessage('Команда в чате менеджеров');
     })->skipGlobalMiddlewares();
 
+    $bot->onCommand('setting', Conversations\Manager\SettingsMenu::class);
+
     // обработка кнопки "Отрпавить биток"
     $bot->onCallbackQueryData('/btc/send/:{orderId}/:{typeValue}', \App\Telegram\Handlers\Manager\SendBitcoinHandler::class)
         ->whereNumber('orderId')
-        ->whereNumber('typeValue');
+        ->whereNumber('typeValue')
+        ->skipGlobalMiddlewares();
+
+    $bot->onCommand('test', Conversations\ChooseColorMenu::class);
 })
     ->middleware(EnsureManagerChat::class);
 
@@ -42,8 +47,6 @@ $bot->group(function (Nutgram $bot) {
 
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
-
-    $bot->onCommand('test', Conversations\ChooseColorMenu::class);
 
     $bot->onText(__('commands.start.menu.buy.btc'), Conversations\User\BtcConversation::class);
 

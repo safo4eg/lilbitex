@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'enabled' => env('TELESCOPE_ENABLED', true) && !app()->runningInConsole(),
+    'enabled' => env('TELESCOPE_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------
