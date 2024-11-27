@@ -12,7 +12,7 @@ return [
         'groups' => [
             \App\Enums\GroupsEnum::MANAGER->value => (int) env('MANAGER_CHAT_ID')
         ],
-        'user_admin_chat_id' => env('USER_ADMIN_CHAT_ID'),
+        'boss_chat_id' => env('BOSS_CHAT_ID'),
     ],
 
     // Set if the service provider should automatically load

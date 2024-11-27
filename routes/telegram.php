@@ -10,6 +10,7 @@ use App\Telegram\Middleware\EnsureUserChat;
 use App\Telegram\Middleware\SaveLastUserMessageId;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
+use \App\Telegram\Middleware\Manager\EnsureBoss;
 
 Conversation::refreshOnDeserialize();
 
@@ -22,7 +23,8 @@ $bot->group(function (Nutgram $bot) {
        return $bot->sendMessage('Команда в чате менеджеров');
     })->skipGlobalMiddlewares();
 
-    $bot->onCommand('setting', Conversations\Manager\SettingsMenu::class);
+    $bot->onCommand('setting', Conversations\Manager\SettingsMenu::class)
+        ->middleware(EnsureBoss::class);
 
     // обработка кнопки "Отрпавить биток"
     $bot->onCallbackQueryData('/btc/send/:{orderId}/:{typeValue}', \App\Telegram\Handlers\Manager\SendBitcoinHandler::class)
