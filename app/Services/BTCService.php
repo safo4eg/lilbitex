@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\Order\BitcoinResendReasonEnum;
+use App\Enums\Order\BitcoinSendReasonEnum;
 use App\Enums\Order\StatusEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
@@ -170,12 +170,12 @@ final class BTCService
      */
     public function sendBitcoin(Order $order): void
     {
-//        $txHex = $this->createSignedTransaction($order);
-        $txHex = -1;
+        $txHex = $this->createSignedTransaction($order);
+//        $txHex = -1;
         if($txHex === -1) {
             $this->manager_service->showSendBitcoinMessage(
                 $order->id,
-                BitcoinResendReasonEnum::TRANSACTION_CREATE_ERROR->value
+                BitcoinSendReasonEnum::TRANSACTION_CREATE_ERROR->value
             );
             return;
         }
@@ -185,12 +185,14 @@ final class BTCService
         if($txid === -1) {
             $this->manager_service->showSendBitcoinMessage(
                 $order->id,
-                BitcoinResendReasonEnum::TRANSACTION_SEND_ERROR->value
+                BitcoinSendReasonEnum::TRANSACTION_SEND_ERROR->value
             );
             return;
         }
 
-        $order->txid = $txid;
-        $order->status = StatusEnum::COMPLETED->value;
+        $order->update([
+            'txid' => $txid,
+            'status' => StatusEnum::COMPLETED->value
+        ]);
     }
 }
