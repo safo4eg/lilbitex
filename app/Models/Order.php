@@ -19,6 +19,7 @@ class Order extends Model
         return [
             'sum_to_pay' => 'string',
             'last_transaction_check' => 'datetime',
+            'created_at' => 'datetime'
         ];
     }
 

@@ -3,13 +3,13 @@
 namespace App\Telegram\Services;
 
 use App\Enums\GroupsEnum;
+use App\Enums\Order\BitcoinSendReasonEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
-use App\Telegram\Conversations\Manager\ManagerPendingExchangeOrderMenu;
 use Illuminate\Support\Facades\Log;
-use Nutgram\Laravel\Facades\Telegram;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
@@ -35,21 +35,38 @@ class ManagerService
         $viewData = [
             'typeValue' => $typeValue,
             'orderNumber' => $order->id,
+            'orderCreatedAt' => $order->created_at,
+            'sumToPay' => $order->sum_to_pay,
             'userId' => $order->user->id,
             'username' => $order->user->username,
             'walletType' => WalletTypeEnum::getWalletTypesName()[$order->setting->wallet_type],
             'walletAddress' => $order->wallet_address,
             'sumToSend' => BTCHelper::convertSatoshiToBTC($order->amount + $order->network_fee),
         ];
-        Log::channel('single')->debug($this->chat_id);
-        $this->bot->sendMessage(
-            text: (string) view('telegram.manager.send-bitcoin-message', $viewData),
-            reply_markup: InlineKeyboardMarkup::make()
-                ->addRow(InlineKeyboardButton::make(
+
+        $inlineKeyboardMarkup = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make(
                     text: 'Отправить биток',
                     callback_data: "/btc/send/:$orderId/:$typeValue"
-                )),
-            chat_id: $this->chat_id
+                )
+            );
+
+        if(BitcoinSendReasonEnum::CHECK_PAYMENT_AND_SEND_BITCOIN->value === $typeValue) {
+            $inlineKeyboardMarkup->addRow(
+                InlineKeyboardButton::make(
+                    text: 'Отменить',
+                    callback_data: "/btc/cancel/:$orderId"
+                )
+            );
+        }
+
+
+        $this->bot->sendMessage(
+            text: (string) view('telegram.manager.send-bitcoin-message', $viewData),
+            reply_markup: $inlineKeyboardMarkup,
+            chat_id: $this->chat_id,
+            parse_mode: ParseMode::HTML
         );
     }
 }
