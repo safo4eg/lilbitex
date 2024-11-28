@@ -11,7 +11,7 @@ use SergiX44\Nutgram\Conversations\InlineMenu;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 
-class SettingsMenu extends InlineMenu
+class ExchangerSettingMenu extends InlineMenu
 {
     public string $setting_id;
 
@@ -22,7 +22,7 @@ class SettingsMenu extends InlineMenu
         foreach (WalletTypeEnum::cases() as $walletType) {
             $inlineButtons[] = InlineKeyboardButton::make(
                 text: $walletTypeNames[$walletType->value],
-                callback_data: $walletType->value . '@showSettingsMenu'
+                callback_data: $walletType->value . '@showSettingMenu'
             );
         }
 
@@ -32,7 +32,7 @@ class SettingsMenu extends InlineMenu
             ->showMenu();
     }
 
-    public function showSettingsMenu(Nutgram $bot): void
+    public function showSettingMenu(Nutgram $bot): void
     {
         $setting = null;
         if(isset($this->setting_id)) {
@@ -53,7 +53,7 @@ class SettingsMenu extends InlineMenu
             'exchangerFee' => $setting->exchanger_fee,
         ];
 
-        $menuBuilder = $this->menuText(view('telegram.manager.show-settings', $viewData))
+        $menuBuilder = $this->menuText(view('telegram.manager.exchanger-setting-menu', $viewData))
             ->clearButtons();
 
         $buttons = $this->getSettingsButtons();
@@ -104,7 +104,7 @@ class SettingsMenu extends InlineMenu
                 ->update(['exchanger_fee' => $fee]);
 
             $this->closeMenu();
-            $this->showSettingsMenu($bot);
+            $this->showSettingMenu($bot);
         } catch (\Exception $e) {
             $this->bot->sendMessage('Ошибка при обновлении БД, повторите попытку.');
             return;
@@ -151,7 +151,7 @@ class SettingsMenu extends InlineMenu
             $setting->update(['min_amount' => $amount]);
 
             $this->closeMenu();
-            $this->showSettingsMenu($bot);
+            $this->showSettingMenu($bot);
         } catch (\Exception $e) {
             $this->bot->sendMessage('Ошибка при обновлении БД, повторите попытку.');
             return;
@@ -198,7 +198,7 @@ class SettingsMenu extends InlineMenu
             $setting->update(['max_amount' => $amount]);
 
             $this->closeMenu();
-            $this->showSettingsMenu($bot);
+            $this->showSettingMenu($bot);
         } catch (\Exception $e) {
             $this->bot->sendMessage('Ошибка при обновлении БД, повторите попытку.');
             return;

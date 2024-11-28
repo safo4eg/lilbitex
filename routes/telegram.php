@@ -23,8 +23,10 @@ $bot->group(function (Nutgram $bot) {
        return $bot->sendMessage('Команда в чате менеджеров');
     })->skipGlobalMiddlewares();
 
-    $bot->onCommand('setting', Conversations\Manager\SettingsMenu::class)
-        ->middleware(EnsureBoss::class);
+    $bot->group(function (Nutgram $bot) {
+        $bot->onCommand('setting', Conversations\Manager\ExchangerSettingMenu::class);
+        $bot->onCommand('requisite', Conversations\Manager\RequisiteMenu::class);
+    })->middleware(EnsureBoss::class);
 
     // обработка кнопки "Отрпавить биток"
     $bot->onCallbackQueryData('/btc/send/:{orderId}/:{typeValue}', \App\Telegram\Handlers\Manager\SendBitcoinHandler::class)
