@@ -28,6 +28,10 @@ class ExchangerSettingMenu extends InlineMenu
 
         $this->menuText('Выберите настройки для изменений')
             ->addButtonRow(...$inlineButtons)
+            ->addButtonRow(InlineKeyboardButton::make(
+                text: 'Закрыть',
+                callback_data: '@exitMenu'
+            ))
             ->orNext('none')
             ->showMenu();
     }
@@ -209,7 +213,7 @@ class ExchangerSettingMenu extends InlineMenu
     {
     }
 
-    public function endInlineMenu():void
+    public function exitMenu():void
     {
         $this->end();
     }
@@ -245,7 +249,7 @@ class ExchangerSettingMenu extends InlineMenu
 
         $buttons[] = InlineKeyboardButton::make(
             text: 'Закрыть меню',
-            callback_data: '@endInlineMenu'
+            callback_data: '@exitMenu'
         );
 
         return $buttons;

@@ -46,6 +46,11 @@ class RequisiteMenu extends InlineMenu
             ));
         }
 
+        $menuBuilder->addButtonRow(InlineKeyboardButton::make(
+            text: 'Закрыть',
+            callback_data: '@exitMenu'
+        ));
+
         $menuBuilder
             ->orNext('none')
             ->showMenu();
@@ -68,7 +73,7 @@ class RequisiteMenu extends InlineMenu
     public function handleBankName(Nutgram $bot): void
     {
         $bankName = $bot->message()->text;
-        Log::channel('single')->debug($bankName);
+
         $validator = Validator::make(
             ['bank_name' => $bankName],
             ['bank_name' => ['required', 'string', 'max:32']]
@@ -177,13 +182,38 @@ class RequisiteMenu extends InlineMenu
     /**
      * Отвечает за сброс реквизитов
      */
-    public function deleteRequisite()
+    public function deleteRequisite(Nutgram $bot)
     {
+        $this->menuText(view('telegram.manager.delete-requisite'))
+            ->clearButtons()
+            ->addButtonRow(InlineKeyboardButton::make(
+                text: 'Да, сбросить реквизиты',
+                callback_data: '@handleDeleteRequisite'
+            ))
+            ->addButtonRow($this->getCancelButton())
+            ->orNext('none')
+            ->showMenu();
+    }
 
+    public function handleDeleteRequisite(Nutgram $bot): void
+    {
+        Requisite::where('status', StatusEnum::ENABLED->value)
+            ->update(['status' => StatusEnum::DISABLED->value]);
+
+        $this->enabled_requisite_id = null;
+
+        $this->clearButtons()
+            ->closeMenu();
+        $this->start($bot);
     }
 
     public function none(Nutgram $bot)
     {
+    }
+
+    public function exitMenu(Nutgram $bot): void
+    {
+        $this->end();
     }
 
     private function getCancelButton(): InlineKeyboardButton
