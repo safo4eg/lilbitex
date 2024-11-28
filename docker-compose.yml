@@ -65,6 +65,15 @@ services:
       - 4040:4040
     networks:
       - lilbitex_network
+  supervisor:
+    build: ./_docker/supervisor
+    container_name: lilbitex_supervisor
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql
+    networks:
+      - lilbitex_network
   cron:
     build: ./_docker/cron
     container_name: lilbitex_cron
@@ -72,6 +81,7 @@ services:
       - ./:/var/www
     networks:
       - lilbitex_network
+
 networks:
   lilbitex_network:
     driver: bridge
