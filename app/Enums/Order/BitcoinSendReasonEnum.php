@@ -2,7 +2,7 @@
 
 namespace App\Enums\Order;
 
-enum BitcoinResendReasonEnum: int
+enum BitcoinSendReasonEnum: int
 {
     CASE TRANSACTION_CREATE_ERROR = 1;
     CASE TRANSACTION_SEND_ERROR = 2;

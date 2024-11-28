@@ -5,7 +5,7 @@
  */
 namespace App\Telegram\Conversations\User;
 
-use App\Enums\Order\BitcoinResendReasonEnum;
+use App\Enums\Order\BitcoinSendReasonEnum;
 use App\Enums\Order\StatusEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
@@ -65,7 +65,7 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
 
         $managerService->showSendBitcoinMessage(
             $orderId,
-            BitcoinResendReasonEnum::CHECK_PAYMENT_AND_SEND_BITCOIN->value
+            BitcoinSendReasonEnum::CHECK_PAYMENT_AND_SEND_BITCOIN->value
         );
 
         $this->end();
