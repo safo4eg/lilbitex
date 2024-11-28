@@ -7,18 +7,22 @@ use App\Exceptions\SilentVerifyOrderTimeoutJobException;
 use App\Models\Order;
 use App\Telegram\Conversations\User\CancelledOrderMenu;
 use App\Telegram\Services\BotService;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use SergiX44\Nutgram\Nutgram;
 
+
 class VerifyOrderTimeoutJob implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, Dispatchable, SerializesModels;
 
     public Order $order;
     public $backoff = 5;
     public $tries = 0;
-    public $orderTimeLimit = 300; // количество секунд которе может жить счет в статусе ожидания оплаты
+    public $orderTimeLimit = 15; // количество секунд которе может жить счет в статусе ожидания оплаты
 
     public function __construct(Order $order)
     {
