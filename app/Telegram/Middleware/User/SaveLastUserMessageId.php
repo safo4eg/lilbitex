@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Telegram\Middleware;
+namespace App\Telegram\Middleware\User;
 
 use App\Telegram\Services\BotService;
-use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 
 class SaveLastUserMessageId

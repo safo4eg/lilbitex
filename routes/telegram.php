@@ -4,13 +4,14 @@
 use App\Telegram\Commands\User\OrderCommand;
 use App\Telegram\Commands\User\StartCommand;
 use App\Telegram\Conversations;
-use App\Telegram\Middleware\ClearBotHistory;
 use App\Telegram\Middleware\EnsureManagerChat;
 use App\Telegram\Middleware\EnsureUserChat;
-use App\Telegram\Middleware\SaveLastUserMessageId;
+use App\Telegram\Middleware\Manager\EnsureBoss;
+use App\Telegram\Middleware\User\ClearBotHistory;
+use App\Telegram\Middleware\User\SaveLastUserMessageId;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
-use \App\Telegram\Middleware\Manager\EnsureBoss;
+use \App\Telegram\Middleware\User\EnsureActiveRequsiteExists;
 
 Conversation::refreshOnDeserialize();
 
@@ -24,8 +25,10 @@ $bot->group(function (Nutgram $bot) {
     })->skipGlobalMiddlewares();
 
     $bot->group(function (Nutgram $bot) {
-        $bot->onCommand('setting', Conversations\Manager\ExchangerSettingMenu::class);
-        $bot->onCommand('requisite', Conversations\Manager\RequisiteMenu::class);
+        $bot->onCommand('setting', Conversations\Manager\ExchangerSettingMenu::class)
+            ->skipGlobalMiddlewares();
+        $bot->onCommand('requisite', Conversations\Manager\RequisiteMenu::class)
+            ->skipGlobalMiddlewares();
     })->middleware(EnsureBoss::class);
 
     // обработка кнопки "Отрпавить биток"
@@ -52,7 +55,8 @@ $bot->group(function (Nutgram $bot) {
         return $bot->deleteMessage($bot->chatId(), $bot->messageId());
     });
 
-    $bot->onText(__('commands.start.menu.buy.btc'), Conversations\User\BtcConversation::class);
+    $bot->onText('Купить BTC', Conversations\User\BtcConversation::class)
+        ->middleware(EnsureActiveRequsiteExists::class);
 
     // дл логирования сообщений пользователя
     $bot->onMessage(function (Nutgram $bot) {});
