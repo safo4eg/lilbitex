@@ -65,6 +65,13 @@ services:
       - 4040:4040
     networks:
       - lilbitex_network
+  cron:
+    build: ./_docker/cron
+    container_name: lilbitex_cron
+    volumes:
+      - ./:/var/www
+    networks:
+      - lilbitex_network
 networks:
   lilbitex_network:
     driver: bridge
