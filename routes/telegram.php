@@ -12,6 +12,8 @@ use App\Telegram\Middleware\User\SaveLastUserMessageId;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use \App\Telegram\Middleware\User\EnsureActiveRequsiteExists;
+use \App\Telegram\Handlers\Manager\SendBitcoinHandler;
+use \App\Telegram\Handlers\Manager\CancelOrderHandler;
 
 Conversation::refreshOnDeserialize();
 
@@ -31,11 +33,13 @@ $bot->group(function (Nutgram $bot) {
             ->skipGlobalMiddlewares();
     })->middleware(EnsureBoss::class);
 
-    // обработка кнопки "Отрпавить биток"
-    $bot->onCallbackQueryData('/btc/send/:{orderId}/:{typeValue}', \App\Telegram\Handlers\Manager\SendBitcoinHandler::class)
+    // обработка кнопки "Отправить биток"
+    $bot->onCallbackQueryData('/btc/send/:{orderId}/:{typeValue}', SendBitcoinHandler::class)
         ->whereNumber('orderId')
         ->whereNumber('typeValue')
         ->skipGlobalMiddlewares();
+
+    $bot->onCallbackQueryData("/btc/cancel/:{orderId}", CancelOrderHandler::class);
 
     $bot->onCommand('test', Conversations\ChooseColorMenu::class);
 })
