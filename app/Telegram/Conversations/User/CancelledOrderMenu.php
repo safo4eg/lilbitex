@@ -5,14 +5,19 @@
  */
 namespace App\Telegram\Conversations\User;
 
+use App\Enums\Order\BitcoinResendReasonEnum;
 use App\Enums\Order\StatusEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
 use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
+use App\Telegram\Services\ManagerService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use function Laravel\Prompts\text;
 
 class CancelledOrderMenu extends InlineMenuWithSaveMessageId
 {
@@ -42,13 +47,38 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
             text: view('telegram.user.cancelled-menu', $viewData),
             opt: ['parse_mode' => ParseMode::HTML]
         )
+            ->addButtonRow(InlineKeyboardButton::make(
+                text: 'Я оплатил',
+                callback_data: "{$order->id}@requestSendBitcoin"
+            ))
             ->showMenu();
+    }
+
+    public function requestSendBitcoin(Nutgram $bot): void
+    {
+        $managerService = app(ManagerService::class);
+
+        $orderId = $bot->callbackQuery()->data;
+
+        Order::where('id', $orderId)
+            ->update(['status' => StatusEnum::PENDING_EXCHANGE]);
+
+        $managerService->showSendBitcoinMessage(
+            $orderId,
+            BitcoinResendReasonEnum::CHECK_PAYMENT_AND_SEND_BITCOIN->value
+        );
+
+        $this->end();
+
+        PendingExchangeOrderMenu::begin(
+            bot: $bot,
+            userId: $this->chatId,
+            chatId: $this->chatId
+        );
     }
 
     // будет вызываться если не нажата кнопка
     public function none(Nutgram $bot)
     {
-        $bot->sendMessage('Bye!');
-        $this->end();
     }
 }
