@@ -6,6 +6,7 @@ use App\Enums\AssetEnum;
 use App\Enums\Order\TypeEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
+use App\Jobs\VerifyOrderTimeoutJob;
 use App\Models\ExchangerSetting;
 use App\Models\Order;
 use App\Models\Requisite;
@@ -278,6 +279,6 @@ class BtcConversation extends Conversation
             userId: $bot->userId(),
             chatId: $bot->chatId(),
         );
-//        VerifyOrderTimeoutJob::dispatch($order);
+        VerifyOrderTimeoutJob::dispatch($order);
     }
 }
