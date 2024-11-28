@@ -68,7 +68,12 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
             BitcoinSendReasonEnum::CHECK_PAYMENT_AND_SEND_BITCOIN->value
         );
 
+        // удаляем не через end, тк на стороне сервака запускаем InlineMenu
         $this->end();
+        $bot->deleteMessage(
+            message_id: $bot->messageId(),
+            chat_id: $bot->userId()
+        );
 
         PendingExchangeOrderMenu::begin(
             bot: $bot,
