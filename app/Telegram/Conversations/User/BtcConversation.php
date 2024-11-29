@@ -161,7 +161,13 @@ class BtcConversation extends Conversation
         }
 
         // подсчет суммы для отправки
-        $this->exchanger_setting_service->updateNetworkFee($setting);
+        if(!$this->exchanger_setting_service->updateNetworkFee($setting)) {
+            $this->bot->sendMessageWithSaveId(
+                text: 'Произошла ошибка, введите сумму еще раз.',
+                chat_id: $bot->chatId()
+            );
+            return;
+        }
 
         $baseExchangerFee = bcmul(
             $amountSatoshi,
@@ -220,7 +226,7 @@ class BtcConversation extends Conversation
 
         if(!$walletAddress) {
             $bot->sendMessageWithSaveId(
-                text: 'Вам нужно ввести адрес своего BTC-кошелька.',
+                text: 'Вам нужно ввести адрес своего BTC-адрес.',
                 chat_id: $bot->chatId()
             );
             return;
@@ -228,7 +234,7 @@ class BtcConversation extends Conversation
 
         if(!$this->mempool_space_service->validateAddress($walletAddress)) {
             $bot->sendMessageWithSaveId(
-                text: 'Некорректный btc-адрес, повторите попытку.',
+                text: 'Произошла ошибка при проверке адреса, введите свой BTC-адрес еще раз.',
                 chat_id: $bot->chatId()
             );
             return;

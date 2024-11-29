@@ -52,31 +52,30 @@ final class ExchangerSettingService
      * Обновить комиссию сети
      * - для бигмафии она всегда 0, так как там процент берется за API
      */
-    public function updateNetworkFee(ExchangerSetting $setting): void
+    public function updateNetworkFee(ExchangerSetting $setting): bool
     {
-        $networkFee = -1;
+        $networkFee = 0;
 
         // комиссия сети для BTC настроек обменника
         if($setting->asset === AssetEnum::BTC->value) {
 
-            switch ($setting->wallet_type) {
-                case WalletTypeEnum::BIGMAFIA->value:
-                    $networkFee = 0;
-                    break;
-                case WalletTypeEnum::EXTERNAL->value:
-                    $feePerByte = $this->mempool_space_service->getRecommendedFees();
-//                    $feePerByte = 10;
-                    $feePerByte = ($feePerByte === -1)
-                        ? $setting->network_fee
-                        : $feePerByte;
-                    $networkFee = $feePerByte * 160; // cумма комиссии для адресов bc1q
-                    break;
+            if($setting->wallet_type === WalletTypeEnum::EXTERNAL->value) {
+                $feePerByte = $this->mempool_space_service->getRecommendedFees();
+
+                if($feePerByte === -1) {
+                    return false;
+                }
+
+                $networkFee = $feePerByte * 170; // сумма комисси для адресов bc1q
+            }
+
+            if($setting->wallet_type === WalletTypeEnum::BIGMAFIA->value) {
+                // комиссия для бигмафии
             }
         }
 
-        if($networkFee !== -1) {
-            $setting->network_fee = $networkFee;
-            $setting->save();
-        }
+        $setting->network_fee = $networkFee;
+        $setting->save();
+        return true;
     }
 }
