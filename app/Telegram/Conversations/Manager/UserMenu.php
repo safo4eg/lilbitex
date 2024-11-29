@@ -131,7 +131,6 @@ class UserMenu extends InlineMenu
 
     public function none(Nutgram $bot)
     {
-        $this->end();
     }
 
     public function exitMenu():void

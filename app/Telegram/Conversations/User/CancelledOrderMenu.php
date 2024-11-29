@@ -11,6 +11,7 @@ use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
 use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
+use App\Telegram\Services\BotService;
 use App\Telegram\Services\ManagerService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +22,7 @@ use function Laravel\Prompts\text;
 
 class CancelledOrderMenu extends InlineMenuWithSaveMessageId
 {
-    public function start(Nutgram $bot)
+    public function start(Nutgram $bot): void
     {
         // пока что только для битка делаю,
         //возможно в дальнейшем здесь придется абстрактно для других монет сделать
@@ -33,6 +34,11 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
             ->where('status', StatusEnum::CANCELLED->value)
             ->latest()
             ->first();
+
+        if ($order->user->deleted_at) {
+            $this->end();
+            return;
+        }
 
         $viewData = [
             'orderNumber' => $order->id,
@@ -69,16 +75,11 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
         );
 
         // удаляем не через end, тк на стороне сервака запускаем InlineMenu
-        $this->end();
-        $bot->deleteMessage(
-            message_id: $bot->messageId(),
-            chat_id: $bot->userId()
-        );
-
+        BotService::clearBotHistory($bot, $bot->userId());
         PendingExchangeOrderMenu::begin(
             bot: $bot,
-            userId: $this->chatId,
-            chatId: $this->chatId
+            userId: $bot->userId(),
+            chatId: $bot->userId()
         );
     }
 
