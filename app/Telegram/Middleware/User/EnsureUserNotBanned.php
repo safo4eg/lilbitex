@@ -16,7 +16,7 @@ class EnsureUserNotBanned
             ->where('chat_id', $bot->userId())
             ->first();
 
-        if ($user->deleted_at) {
+        if ($user && $user->deleted_at) {
             $bot->sendMessageWithSaveId(
                 text: view('telegram.user.middleware.ensure-user-not-banned', ['id' => $user->id]),
                 reply_markup: InlineKeyboardMarkup::make()
