@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('username', 32);
             $table->unsignedTinyInteger('personal_discount')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
