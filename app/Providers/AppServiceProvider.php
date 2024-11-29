@@ -31,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
             return new BTCService(
                 $this->app->make(BlockStreamAPIService::class),
                 $this->app->make(ManagerService::class),
+                $this->app->make(MempoolSpaceAPIService::class)
             );
         });
 

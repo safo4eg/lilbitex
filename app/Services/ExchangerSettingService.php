@@ -64,8 +64,8 @@ final class ExchangerSettingService
                     $networkFee = 0;
                     break;
                 case WalletTypeEnum::EXTERNAL->value:
-//                    $feePerByte = $this->mempool_space_service->getRecommendedFees();
-                    $feePerByte = 10;
+                    $feePerByte = $this->mempool_space_service->getRecommendedFees();
+//                    $feePerByte = 10;
                     $feePerByte = ($feePerByte === -1)
                         ? $setting->network_fee
                         : $feePerByte;

@@ -39,7 +39,9 @@ $bot->group(function (Nutgram $bot) {
         ->whereNumber('typeValue')
         ->skipGlobalMiddlewares();
 
-    $bot->onCallbackQueryData("/btc/cancel/:{orderId}", CancelOrderHandler::class);
+    $bot->onCallbackQueryData("/btc/cancel/:{orderId}", CancelOrderHandler::class)
+        ->whereNumber('orderId')
+        ->skipGlobalMiddlewares();
 
     $bot->onCommand('test', Conversations\ChooseColorMenu::class);
 })

@@ -7,6 +7,7 @@ use App\Enums\Order\StatusEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
 use App\Services\API\BlockStreamAPIService;
+use App\Services\API\MempoolSpaceAPIService;
 use App\Telegram\Services\ManagerService;
 use BitWasp\Bitcoin\Address\AddressCreator;
 use BitWasp\Bitcoin\Key\Factory\PrivateKeyFactory;
@@ -24,17 +25,20 @@ final class BTCService
     private string $exchanger_btc_private_key;
 
     private BlockStreamAPIService $block_stream_api;
+    private MempoolSpaceAPIService $mempool_api;
     private ManagerService $manager_service;
 
     public function __construct(
         BlockStreamAPIService $blockStreamAPI,
-        ManagerService $managerService
+        ManagerService $managerService,
+        MempoolSpaceAPIService $mempoolSpaceAPI,
     )
     {
         $this->exchanger_btc_address = config('app.exchanger_btc_address');
         $this->exchanger_btc_private_key = config('app.exchanger_btc_private_key');
         $this->block_stream_api = $blockStreamAPI;
         $this->manager_service = $managerService;
+        $this->mempool_api = $mempoolSpaceAPI;
     }
 
     /**
@@ -180,7 +184,8 @@ final class BTCService
             return;
         }
 
-        $txid = $this->block_stream_api->sendTransaction($txHex);
+//        $txid = $this->block_stream_api->sendTransaction($txHex);
+        $txid = $this->mempool_api->sendTransaction($txHex);
 
         if($txid === -1) {
             $this->manager_service->showSendBitcoinMessage(
