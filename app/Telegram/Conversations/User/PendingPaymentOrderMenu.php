@@ -7,11 +7,16 @@ use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
 use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
+use App\Telegram\Services\BotService;
 use Illuminate\Database\Eloquent\Builder;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
 {
+    public string $order_id;
+
     public function start(Nutgram $bot)
     {
         $order = Order::whereHas('user', function (Builder $query) use($bot) {
@@ -20,6 +25,8 @@ class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
             ->where('status', StatusEnum::PENDING_PAYMENT->value)
             ->latest()
             ->first();
+
+        $this->order_id = $order->id;
 
         $viewData = [
             'orderNumber' => $order->id,
@@ -34,14 +41,30 @@ class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
         ];
 
         $this->menuText(text: view('telegram.user.pending-payment-menu', $viewData))
+            ->addButtonRow(
+                InlineKeyboardButton::make(
+                    text: 'Отменить',
+                    callback_data: '@handleCancelOrder'
+                )
+            )
             ->showMenu();
     }
 
+    public function handleCancelOrder(Nutgram $bot): void
+    {
+        Order::where('id', $this->order_id)
+            ->update(['status' => StatusEnum::CANCELLED->value]);
+
+        BotService::clearBotHistory($bot, $bot->userId());
+        CancelledOrderMenu::begin(
+            bot: $bot,
+            userId: $bot->userId(),
+            chatId: $bot->userId()
+        );
+    }
 
     // будет вызываться если не нажата кнопка
     public function none(Nutgram $bot)
     {
-        $bot->sendMessage('Bye!');
-        $this->end();
     }
 }
