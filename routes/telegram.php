@@ -16,6 +16,7 @@ use \App\Telegram\Middleware\User\EnsureNoActiveOrder;
 use \App\Telegram\Handlers\Manager\SendBitcoinHandler;
 use \App\Telegram\Handlers\Manager\CancelOrderHandler;
 use \App\Telegram\Middleware\User\EnsureUserNotBanned;
+use \App\Telegram\Handlers\User\ProfileHandler;
 
 Conversation::refreshOnDeserialize();
 
@@ -62,6 +63,9 @@ $bot->group(function (Nutgram $bot) {
 
     $bot->onText('Купить BTC', Conversations\User\BtcConversation::class)
         ->middleware(EnsureActiveRequsiteExists::class)
+        ->middleware(EnsureNoActiveOrder::class);
+
+    $bot->onText('Профиль', ProfileHandler::class)
         ->middleware(EnsureNoActiveOrder::class);
 
     // дл логирования сообщений пользователя
