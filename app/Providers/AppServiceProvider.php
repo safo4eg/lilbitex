@@ -61,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
         Nutgram::macro('sendMessageWithSaveId', function (...$args) {
             $message = $this->sendMessage(...$args);
             BotService::saveBotLastMessageId($this, $message->message_id, $args['chat_id']);
+            return $message->message_id;
         });
     }
 }

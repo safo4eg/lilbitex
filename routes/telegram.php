@@ -15,6 +15,7 @@ use \App\Telegram\Middleware\User\EnsureActiveRequsiteExists;
 use \App\Telegram\Middleware\User\EnsureNoActiveOrder;
 use \App\Telegram\Handlers\Manager\SendBitcoinHandler;
 use \App\Telegram\Handlers\Manager\CancelOrderHandler;
+use \App\Telegram\Middleware\User\EnsureUserNotBanned;
 
 Conversation::refreshOnDeserialize();
 
@@ -70,4 +71,5 @@ $bot->group(function (Nutgram $bot) {
     $bot->onMessage(function (Nutgram $bot) {});
 })
     ->middleware(EnsureUserChat::class)
-    ->middleware(ClearBotHistory::class);
+    ->middleware(ClearBotHistory::class)
+    ->middleware(EnsureUserNotBanned::class);
