@@ -24,14 +24,13 @@ $bot->middleware(SaveLastUserMessageId::class);
 
 // обработка групповых чатов
 $bot->group(function (Nutgram $bot) {
-    $bot->onCommand('manager', function (Nutgram $bot) {
-       return $bot->sendMessage('Команда в чате менеджеров');
-    })->skipGlobalMiddlewares();
-
     $bot->group(function (Nutgram $bot) {
         $bot->onCommand('setting', Conversations\Manager\ExchangerSettingMenu::class)
             ->skipGlobalMiddlewares();
         $bot->onCommand('requisite', Conversations\Manager\RequisiteMenu::class)
+            ->skipGlobalMiddlewares();
+        $bot->onCommand('user {id}', Conversations\Manager\UserMenu::class)
+            ->whereNumber('id')
             ->skipGlobalMiddlewares();
     })->middleware(EnsureBoss::class);
 
@@ -44,8 +43,6 @@ $bot->group(function (Nutgram $bot) {
     $bot->onCallbackQueryData("/btc/cancel/:{orderId}", CancelOrderHandler::class)
         ->whereNumber('orderId')
         ->skipGlobalMiddlewares();
-
-    $bot->onCommand('test', Conversations\ChooseColorMenu::class);
 })
     ->middleware(EnsureManagerChat::class);
 
