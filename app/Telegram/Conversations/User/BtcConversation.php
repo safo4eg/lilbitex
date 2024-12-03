@@ -111,8 +111,6 @@ class BtcConversation extends Conversation
 
         $viewData = [
             'walletTypeName' => WalletTypeEnum::getWalletTypesName()[$setting->wallet_type],
-            'balanceRUB' => $setting->balance_rub,
-            'balanceBTC' => $setting->balance_btc,
             'minAmountRUB' => $setting->min_amount,
             'minAmountBTC' => $setting->min_amount_btc,
             'maxAmountRUB' => $setting->max_amount,

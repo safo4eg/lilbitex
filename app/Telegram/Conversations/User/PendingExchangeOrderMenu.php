@@ -10,6 +10,7 @@ use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
 use App\Telegram\Services\BotService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 
@@ -54,7 +55,7 @@ class PendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
 
     public function updateOrderDetails(Nutgram $bot): void
     {
-        BotService::clearBotHistory(bot: $bot, chatId: $this->chatId);
+//        BotService::clearBotHistory(bot: $bot, chatId: $this->chatId);
 
         $order = Order::find($this->order_id);
 

@@ -17,6 +17,7 @@ use \App\Telegram\Handlers\Manager\SendBitcoinHandler;
 use \App\Telegram\Handlers\Manager\CancelOrderHandler;
 use \App\Telegram\Middleware\User\EnsureUserNotBanned;
 use \App\Telegram\Handlers\User\ProfileHandler;
+use Illuminate\Support\Facades\Log;
 
 Conversation::refreshOnDeserialize();
 
@@ -28,12 +29,14 @@ $bot->group(function (Nutgram $bot) {
     $bot->group(function (Nutgram $bot) {
         $bot->onCommand('setting', Conversations\Manager\ExchangerSettingMenu::class)
             ->skipGlobalMiddlewares();
-        $bot->onCommand('requisite', Conversations\Manager\RequisiteMenu::class)
-            ->skipGlobalMiddlewares();
-        $bot->onCommand('user {id}', Conversations\Manager\UserMenu::class)
-            ->whereNumber('id')
-            ->skipGlobalMiddlewares();
     })->middleware(EnsureBoss::class);
+
+    $bot->onCommand('requisite', Conversations\Manager\RequisiteMenu::class)
+        ->skipGlobalMiddlewares();
+
+    $bot->onCommand('user {id}', Conversations\Manager\UserMenu::class)
+        ->whereNumber('id')
+        ->skipGlobalMiddlewares();
 
     // обработка кнопки "Отправить биток"
     $bot->onCallbackQueryData('/btc/send/:{orderId}/:{typeValue}', SendBitcoinHandler::class)

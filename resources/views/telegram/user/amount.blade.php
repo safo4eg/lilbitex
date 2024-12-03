@@ -2,8 +2,7 @@
 🔁 Перевод на <b>{{$walletTypeName}}</b>
 ======================
 
-💰 Резерв: {{$balanceRUB}} RUB | {{$balanceBTC}} BTC
-📊 Текущий курс: {{$rate}}
+📊 Текущий курс: {{$rate}} RUB
 🔻 Минимальная сумма: {{$minAmountRUB}} RUB | {{$minAmountBTC}} BTC
 🔺 Максимальная сумма: {{$maxAmountRUB}} RUB | {{$maxAmountBTC}} BTC
 
