@@ -3,6 +3,7 @@
 namespace App\Telegram\Commands\User;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Handlers\Type\Command;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\KeyboardButton;
@@ -16,11 +17,15 @@ class StartCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
-        User::firstOrCreate([
-            'chat_id' => $bot->user()->id,
-            'first_name' => $bot->user()->first_name?? null,
-            'username' => $bot->user()->username?? null
-        ]);
+        $user = User::firstWhere('chat_id', $bot->userId());
+        
+        if(!$user) {
+            User::create([
+                'chat_id' => $bot->userId(),
+                'first_name' => $bot->user()->first_name,
+                'username' => $bot->user()->username
+            ]);
+        }
 
         $bot->sendMessageWithSaveId(
             text: "Hello world",
