@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('chat_id')->unique();
-            $table->string('first_name', 64);
-            $table->string('username', 32);
+            $table->string('first_name', 64)->nullable();
+            $table->string('username', 32)->nullable();
             $table->unsignedTinyInteger('personal_discount')->default(0);
             $table->timestamps();
             $table->softDeletes();

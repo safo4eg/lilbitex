@@ -18,8 +18,8 @@ class StartCommand extends Command
     {
         User::firstOrCreate([
             'chat_id' => $bot->user()->id,
-            'first_name' => $bot->user()->first_name,
-            'username' => $bot->user()->username
+            'first_name' => $bot->user()->first_name?? null,
+            'username' => $bot->user()->username?? null
         ]);
 
         $bot->sendMessageWithSaveId(
