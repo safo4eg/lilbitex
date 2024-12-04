@@ -57,6 +57,7 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
                 text: 'Я оплатил',
                 callback_data: "{$order->id}@requestSendBitcoin"
             ))
+            ->addButtonRow(BotService::getReturnToMenuButton())
             ->showMenu();
     }
 

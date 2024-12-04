@@ -25,6 +25,9 @@ class PendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
 
     public function start(Nutgram $bot)
     {
+        $this->clearButtons()
+            ->closeMenu();
+
         $order = Order::whereHas('user', function (Builder $query) {
             $query->where('chat_id', $this->chatId);
         })
@@ -55,8 +58,6 @@ class PendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
 
     public function updateOrderDetails(Nutgram $bot): void
     {
-//        BotService::clearBotHistory(bot: $bot, chatId: $this->chatId);
-
         $order = Order::find($this->order_id);
 
         if($order->status === StatusEnum::COMPLETED->value) {
@@ -67,7 +68,6 @@ class PendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
             );
         } else {
             $order->update(['last_transaction_check' => Carbon::now()]);
-            $this->clearButtons();
             $this->start($bot);
         }
     }

@@ -47,6 +47,7 @@ class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
                     callback_data: '@handleCancelOrder'
                 )
             )
+            ->addButtonRow(BotService::getReturnToMenuButton())
             ->showMenu();
     }
 

@@ -7,6 +7,7 @@ use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
 use App\Models\Order;
 use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
+use App\Telegram\Services\BotService;
 use Illuminate\Database\Eloquent\Builder;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
@@ -39,6 +40,7 @@ class CompletedOrderMenu extends InlineMenuWithSaveMessageId
                     url: "https://mempool.space/ru/testnet/tx/{$order->txid}"
                 )
             )
+            ->addButtonRow(BotService::getReturnToMenuButton())
             ->orNext('none')
             ->showMenu();
     }

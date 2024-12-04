@@ -55,21 +55,13 @@ $bot->group(function (Nutgram $bot) {
     $bot->onCommand('start', StartCommand::class);
     $bot->onCommand('order', OrderCommand::class);
 
-    $bot->onCommand('null', function (Nutgram $bot) {
-        $bot->deleteUserData('bot.message_ids', $bot->userId());
-        $bot->deleteUserData('bot.last_message_id', $bot->userId());
-        $bot->deleteUserData('user.message_ids', $bot->userId());
-        $bot->deleteUserData('user.last_message_id', $bot->userId());
-
-        return $bot->deleteMessage($bot->chatId(), $bot->messageId());
-    });
 
     $bot->onText('Купить BTC', Conversations\User\BtcConversation::class)
         ->middleware(EnsureActiveRequsiteExists::class)
         ->middleware(EnsureNoActiveOrder::class);
+    $bot->onText('Профиль', ProfileHandler::class);
 
-    $bot->onText('Профиль', ProfileHandler::class)
-        ->middleware(EnsureNoActiveOrder::class);
+    $bot->onCallbackQueryData('command:start', StartCommand::class);
 
     // дл логирования сообщений пользователя
     $bot->onMessage(function (Nutgram $bot) {});

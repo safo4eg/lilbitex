@@ -65,6 +65,7 @@ class BtcConversation extends Conversation
                 callback_data: $walletType->value
             ));
         }
+        $inlineKeyboardMarkup->addRow(BotService::getReturnToMenuButton());
 
         $bot->sendMessageWithSaveId(
             text: 'Выберите кошелёк куда будем пополнять:',
@@ -121,7 +122,9 @@ class BtcConversation extends Conversation
         $bot->sendMessageWithSaveId(
             text: view('telegram.user.amount', $viewData),
             parse_mode: ParseMode::HTML,
-            chat_id: $bot->chatId()
+            chat_id: $bot->chatId(),
+            reply_markup: InlineKeyboardMarkup::make()
+                ->addRow(BotService::getReturnToMenuButton())
         );
 
         $this->next('handleAmount');
@@ -213,7 +216,9 @@ class BtcConversation extends Conversation
         $bot->sendMessageWithSaveId(
             text: $message,
             parse_mode: ParseMode::HTML,
-            chat_id: $bot->chatId()
+            chat_id: $bot->chatId(),
+            reply_markup: InlineKeyboardMarkup::make()
+                ->addRow(BotService::getReturnToMenuButton())
         );
         $this->next('handleWalletAddress');
     }

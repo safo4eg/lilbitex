@@ -3,30 +3,37 @@
 namespace App\Telegram\Services;
 
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 
 class BotService
 {
+    public static function getReturnToMenuButton(): InlineKeyboardButton
+    {
+        return InlineKeyboardButton::make(
+            text: 'Вернуться в меню',
+            callback_data: 'command:start'
+        );
+    }
+
     /**
      * Сохранить идентификатор сообщения пользователя
      */
     public static function saveUserMessageId(Nutgram $bot): void
     {
         if($bot->message()) {
-            $messageIds = $bot->getUserData('user.message_ids');
-            $lastMessageId = $bot->getUserData('user.last_message_id');
+            $messageIds = $bot->getUserData(
+                key: 'user.message_ids',
+                userId: $bot->userId(),
+                default: []
+            );
 
-            if (!$messageIds) {
-                $messageIds = [];
-            }
+            $messageIds[] = $bot->messageId();
 
-            if ($lastMessageId) {
-                $messageIds[] = $lastMessageId;
-            }
-
-            $lastMessageId = $bot->messageId();
-
-            $bot->setUserData('user.message_ids', $messageIds, $bot->chatId());
-            $bot->setUserData('user.last_message_id', $lastMessageId, $bot->chatId());
+            $bot->setUserData(
+                key: 'user.message_ids',
+                value: $messageIds,
+                userId: $bot->userId()
+            );
         }
     }
 
@@ -92,13 +99,8 @@ class BotService
     private static function deleteUserMessages(Nutgram $bot, int $chatId): void
     {
         $messageIds = $bot->getUserData('user.message_ids', $chatId);
-        $lastMessageId = $bot->getUserData('user.last_message_id', $chatId);
 
         if($messageIds) {
-            if($lastMessageId) {
-                $messageIds[] = $lastMessageId;
-                $bot->setUserData('user.last_message_id', null, $chatId);
-            }
 
             $bot->deleteMessages(
                 chat_id: $chatId,
