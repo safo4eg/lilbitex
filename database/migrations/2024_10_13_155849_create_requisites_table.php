@@ -15,9 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('bank_name', 32);
             $table->string('phone', 16);
-            $table->string('first_name', 50);
-            $table->string('last_name', 50);
-            $table->string('middle_name', 50);
+            $table->string('initials', 50);
             $table->boolean('status')->default(1);
             $table->timestamps();
         });

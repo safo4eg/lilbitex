@@ -17,9 +17,7 @@ class RequisiteSeeder extends Seeder
         Requisite::create([
             'bank_name' => 'Т-банк',
             'phone' => '+7(923)409-35-30',
-            'first_name' => 'Станислав',
-            'last_name' => 'Раков',
-            'middle_name' => 'Андреевич',
+            'initials' => 'Станислав',
             'status' => StatusEnum::ENABLED->value
         ]);
     }

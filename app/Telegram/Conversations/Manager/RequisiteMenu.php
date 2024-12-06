@@ -125,7 +125,7 @@ class RequisiteMenu extends InlineMenu
         $this->clearButtons()
             ->closeMenu();
 
-        $this->menuText('Введите ФИО, разделя через пробел. Например: Иванов Иван Иванович')
+        $this->menuText('Введите ФИО.')
             ->addButtonRow($this->getCancelButton())
             ->orNext('handleFio')
             ->showMenu();
@@ -133,23 +133,18 @@ class RequisiteMenu extends InlineMenu
 
     public function handleFio(Nutgram $bot): void
     {
-        $fio = $bot->message()->text;
+        $initials = trim($bot->message()->text);
 
-        $validator = Validator::make(['fio' => $fio], [
-            'fio' => 'required|regex:/^[\wа-яА-ЯёЁ]{1,50} [\wа-яА-ЯёЁ]{1,50} [\wа-яА-ЯёЁ]{1,50}$/u',
+        $validator = Validator::make(['fio' => $initials], [
+            'fio' => ['required', 'max:150'],
         ]);
 
         if ($validator->fails()) {
             $this->closeMenu();
-            $this->menuText('⚠️ Некорректный формат, он должен соотвествовать: Иванов Иван Иванович')
+            $this->menuText('⚠️ Некорректный формат: максимально 50 символов.')
                 ->showMenu();
             return;
         }
-
-        $words = explode(' ', $fio);
-        $this->last_name = $words[0];
-        $this->first_name = $words[1];
-        $this->middle_name = $words[2];
 
         try {
             DB::beginTransaction();
@@ -162,9 +157,7 @@ class RequisiteMenu extends InlineMenu
             Requisite::create([
                 'bank_name' => $this->bank_name,
                 'phone' => $this->phone,
-                'first_name' => $this->first_name,
-                'last_name' => $this->last_name,
-                'middle_name' => $this->middle_name,
+                'initials' => $initials,
                 'status' => StatusEnum::ENABLED->value
             ]);
 
