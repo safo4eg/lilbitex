@@ -206,11 +206,17 @@ class BtcConversation extends Conversation
     {
         $setting = ExchangerSetting::where('id', $this->exchanger_setting_model_id)->first();
 
+        $exchangerFeeSatoshi = (int)$this->sum_to_pay_satoshi - (int)$this->amount - (int)$setting->network_fee;
+
         $message = view('telegram.user.wallet-address', [
             'walletType' => WalletTypeEnum::getWalletTypesName()[$setting->wallet_type],
             'amountBTC' => BTCHelper::convertSatoshiToBTC($this->amount),
             'amountRUB' => BTCHelper::convertSatoshiToRub($this->amount, $setting->rate),
-            'sumToPayRUB' => BTCHelper::convertSatoshiToRub($this->sum_to_pay_satoshi, $setting->rate)
+            'sumToPayRUB' => BTCHelper::convertSatoshiToRub($this->sum_to_pay_satoshi, $setting->rate),
+            'networkFeeBTC' => BTCHelper::convertSatoshiToBTC($setting->network_fee),
+            'networkFeeRUB' => BTCHelper::convertSatoshiToRub($setting->network_fee, $setting->rate),
+            'exchangerFeeBTC' => BTCHelper::convertSatoshiToBTC($exchangerFeeSatoshi),
+            'exchangerFeeRUB' => BTCHelper::convertSatoshiToRub($exchangerFeeSatoshi, $setting->rate)
         ]);
 
         $bot->sendMessageWithSaveId(
