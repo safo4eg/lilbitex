@@ -18,12 +18,6 @@ class ProfileHandler
         $bot->sendMessageWithSaveId(
             text: view('telegram.user.profile-handler', ['user' => $user]),
             reply_markup: InlineKeyboardMarkup::make()
-                ->addRow(
-                    InlineKeyboardButton::make(
-                        text: 'Поддержка',
-                        url: 'https://t.me/LiL_BIT_SUP'
-                    )
-                )
                 ->addRow(BotService::getReturnToMenuButton()),
             chat_id: $bot->userId()
         );

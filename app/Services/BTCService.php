@@ -174,8 +174,8 @@ final class BTCService
      */
     public function sendBitcoin(Order $order): void
     {
-//        $txHex = $this->createSignedTransaction($order);
-        $txHex = -1;
+        $txHex = $this->createSignedTransaction($order);
+//        $txHex = -1;
         if($txHex === -1) {
             $this->manager_service->showSendBitcoinMessage(
                 $order->id,
