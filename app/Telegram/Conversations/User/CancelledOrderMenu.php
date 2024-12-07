@@ -6,6 +6,7 @@
 namespace App\Telegram\Conversations\User;
 
 use App\Enums\Order\BitcoinSendReasonEnum;
+use App\Enums\Order\CancellationReasonEnum;
 use App\Enums\Order\StatusEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
@@ -49,14 +50,22 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
             'sum' => $order->sum_to_pay
         ];
 
-        $this->menuText(
+        $menuBuilder = $this->menuText(
             text: view('telegram.user.cancelled-menu', $viewData),
             opt: ['parse_mode' => ParseMode::HTML]
-        )
-            ->addButtonRow(InlineKeyboardButton::make(
+        );
+
+        if(
+            $order->cancellation_reason === CancellationReasonEnum::SYSTEM->value
+            OR $order->cancellation_reason === CancellationReasonEnum::USER->value
+        ) {
+            $menuBuilder->addButtonRow(InlineKeyboardButton::make(
                 text: 'Я оплатил',
                 callback_data: "{$order->id}@requestSendBitcoin"
-            ))
+            ));
+        }
+
+        $menuBuilder
             ->addButtonRow(BotService::getReturnToMenuButton())
             ->showMenu();
     }
@@ -65,13 +74,12 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
     {
         $managerService = app(ManagerService::class);
 
-        $orderId = $bot->callbackQuery()->data;
+        $order = Order::find($bot->callbackQuery()->data);
 
-        Order::where('id', $orderId)
-            ->update(['status' => StatusEnum::PENDING_EXCHANGE]);
+        $order->update(['status' => StatusEnum::PENDING_EXCHANGE->value]);
 
         $managerService->showSendBitcoinMessage(
-            $orderId,
+            $order->id,
             BitcoinSendReasonEnum::CHECK_PAYMENT_AND_SEND_BITCOIN->value
         );
 

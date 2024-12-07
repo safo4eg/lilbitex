@@ -25,8 +25,7 @@ class PendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
 
     public function start(Nutgram $bot)
     {
-        $this->clearButtons()
-            ->closeMenu();
+        $this->clearButtons();
 
         $order = Order::whereHas('user', function (Builder $query) {
             $query->where('chat_id', $this->chatId);

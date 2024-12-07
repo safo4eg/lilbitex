@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('requisite_id');
             $table->unsignedTinyInteger('exchanger_setting_id');
             $table->unsignedTinyInteger('status')->default(\App\Enums\Order\StatusEnum::PENDING_PAYMENT->value);
+            $table->unsignedTinyInteger('cancellation_reason')->nullable();
             $table->unsignedBigInteger('amount');
             $table->unsignedBigInteger('network_fee');
             $table->decimal('sum_to_pay', 12, 2);

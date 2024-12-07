@@ -2,6 +2,7 @@
 
 namespace App\Telegram\Conversations\User;
 
+use App\Enums\Order\CancellationReasonEnum;
 use App\Enums\Order\StatusEnum;
 use App\Enums\WalletTypeEnum;
 use App\Helpers\BTCHelper;
@@ -54,7 +55,10 @@ class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
     public function handleCancelOrder(Nutgram $bot): void
     {
         Order::where('id', $this->order_id)
-            ->update(['status' => StatusEnum::CANCELLED->value]);
+            ->update([
+                'status' => StatusEnum::CANCELLED->value,
+                'cancellation_reason' => CancellationReasonEnum::USER->value
+            ]);
 
         BotService::clearBotHistory($bot, $bot->userId());
         CancelledOrderMenu::begin(
