@@ -15,7 +15,6 @@ class SendBitcoinHandler
 {
     public function __invoke(Nutgram $bot, int $orderId, int $typeValue, BTCService $BTCService): void
     {
-        Log::channel('single')->debug('зашло в отправку битка');
         $bot->deleteMessage(
             chat_id: $bot->chatId(),
             message_id: $bot->messageId()
