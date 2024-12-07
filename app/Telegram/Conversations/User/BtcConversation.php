@@ -155,8 +155,13 @@ class BtcConversation extends Conversation
             return;
         } else if((int)$amountSatoshi > $setting->max_amount_satoshi) {
             $this->bot->sendMessageWithSaveId(
-                text: 'Введённая сумма больше максимальной.',
-                chat_id: $bot->chatId()
+                text: 'Введённая сумма больше максимальной. Напишите менеджеру.',
+                chat_id: $bot->chatId(),
+                reply_markup: InlineKeyboardMarkup::make()
+                    ->addRow(InlineKeyboardButton::make(
+                        text: 'Написать менеджеру',
+                        url: 'https://t.me/Lilchikbitchik'
+                    ))
             );
             return;
         }
