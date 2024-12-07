@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\Order\CancellationReasonEnum;
 use App\Enums\Order\StatusEnum;
 use App\Exceptions\SilentVerifyOrderTimeoutJobException;
 use App\Models\Order;
@@ -22,7 +23,7 @@ class VerifyOrderTimeoutJob implements ShouldQueue
     public Order $order;
     public $backoff = 5;
     public $tries = 0;
-    public $orderTimeLimit = 10; // количество секунд которе может жить счет в статусе ожидания оплаты
+    public $orderTimeLimit = 5; // количество секунд которе может жить счет в статусе ожидания оплаты
 
     public function __construct(Order $order)
     {
@@ -39,8 +40,10 @@ class VerifyOrderTimeoutJob implements ShouldQueue
             if($elapsedTime > $this->orderTimeLimit) {
                 $bot = app(Nutgram::class);
 
-                $this->order->status = StatusEnum::CANCELLED->value;
-                $this->order->save();
+                $this->order->update([
+                    'status' => StatusEnum::CANCELLED->value,
+                    'cancellation_reason' => CancellationReasonEnum::SYSTEM->value
+                ]);
 
                 BotService::clearBotHistory($bot, $this->order->user->chat_id);
                 CancelledOrderMenu::begin(
