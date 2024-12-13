@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  nginx:
+    container_name: lilbitex_nginx
+    image: nginx:latest
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./_docker/nginx/conf.d:/etc/nginx/conf.d/default.conf
+      - ./_docker/nginx/log:/var/log/nginx
+      - ./:/var/www
+    working_dir: /var/www
+    restart: unless-stopped
+    networks:
+      - lilbitex_network
+  app:
+    container_name: lilbitex_app
+    build: ./_docker/php
+    volumes:
+      - ./:/var/www
+    restart: unless-stopped
+    depends_on:
+      - nginx
+      - mysql
+      - phpmyadmin
+    networks:
+      - lilbitex_network
+  mysql:
+    container_name: lilbitex_mysql
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+    volumes:
+      - ./:/var/www
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - lilbitex_network
+  phpmyadmin:
+    container_name: lilbitex_phpmyadmin
+    image: phpmyadmin
+    ports:
+      - "33060:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    networks:
+      - lilbitex_network
+#  ngrok:
+#    image: ngrok/ngrok:latest
+#    restart: unless-stopped
+#    command:
+#      - "start"
+#      - "--all"
+#      - "--config"
+#      - "/etc/ngrok.yml"
+#    volumes:
+#      - ./_docker/ngrok/ngrok.yml:/etc/ngrok.yml
+#    ports:
+#      - 4040:4040
+#    networks:
+#      - lilbitex_network
+  supervisor:
+    build: ./_docker/supervisor
+    container_name: lilbitex_supervisor
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql
+    networks:
+      - lilbitex_network
+  cron:
+    build: ./_docker/cron
+    container_name: lilbitex_cron
+    volumes:
+      - ./:/var/www
+    networks:
+      - lilbitex_network
+
+networks:
+  lilbitex_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    name: volume_lilbitex_mysql
