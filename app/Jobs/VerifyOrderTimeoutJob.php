@@ -23,7 +23,7 @@ class VerifyOrderTimeoutJob implements ShouldQueue
     public Order $order;
     public $backoff = 5;
     public $tries = 0;
-    public $orderTimeLimit = 5; // количество секунд которе может жить счет в статусе ожидания оплаты
+    public $orderTimeLimit = 10; // количество секунд которе может жить счет в статусе ожидания оплаты
 
     public function __construct(Order $order)
     {

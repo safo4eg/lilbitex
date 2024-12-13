@@ -20,6 +20,7 @@ use \App\Telegram\Middleware\User\EnsureUserNotBanned;
 use \App\Telegram\Handlers\User\ProfileHandler;
 use \App\Telegram\Handlers\User\BuyBitcoinOrSupportHandler;
 use \App\Telegram\Conversations\Manager\NotifyMenu;
+use \App\Telegram\Handlers\User\InfoHandler;
 use Illuminate\Support\Facades\Log;
 
 Conversation::refreshOnDeserialize();
@@ -68,6 +69,7 @@ $bot->group(function (Nutgram $bot) {
         ->middleware(EnsureNoActiveOrder::class);
     $bot->onText('Профиль', ProfileHandler::class);
     $bot->onText('Наш менеджер', BuyBitcoinOrSupportHandler::class);
+    $bot->onText('Инфо', InfoHandler::class);
 
     $bot->onCallbackQueryData('command:start', StartCommand::class);
 

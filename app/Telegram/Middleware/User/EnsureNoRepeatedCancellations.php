@@ -26,7 +26,7 @@ class EnsureNoRepeatedCancellations
             return $order->status === StatusEnum::CANCELLED->value;
         });
 
-        if($cancelledOrders['1'] === 3) {
+        if(isset($cancelledOrders['1']) && $cancelledOrders['1'] === 3) {
             $user = User::where('chat_id', $bot->userId())
                 ->first();
 
