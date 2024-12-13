@@ -2,30 +2,46 @@
 
 namespace App\Telegram\Middleware\User;
 
+use App\Enums\Order\StatusEnum;
+use App\Models\Order;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class EnsureUserNotBanned
+class EnsureNoRepeatedCancellations
 {
     public function __invoke(Nutgram $bot, $next): void
     {
-        $user = User::withTrashed()
-            ->where('chat_id', $bot->userId())
-            ->first();
+        $orders = Order::whereHas('user', function ($query) use($bot) {
+                $query->where('chat_id', $bot->userId());
+            })
+            ->latest()
+            ->limit(3)
+            ->get();
 
-        if ($user && $user->deleted_at) {
+        $cancelledOrders = $orders->countBy(function ($order) {
+            return $order->status === StatusEnum::CANCELLED->value;
+        });
+
+        if($cancelledOrders['1'] === 3) {
+            $user = User::where('chat_id', $bot->userId())
+                ->first();
+
+            $user->update(['deleted_at' => Carbon::now()]);
+
             $bot->sendMessageWithSaveId(
                 text: view('telegram.user.middleware.blocked-user', ['id' => $user->id]),
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(InlineKeyboardButton::make(
                         text: 'Написать менеджеру',
-                        url: 'https://t.me/mamo227'
+                        url: 'https://t.me/Lilchikbitchik'
                     )),
                 chat_id: $bot->userId()
             );
+
             return;
         }
 

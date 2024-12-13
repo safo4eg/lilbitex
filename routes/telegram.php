@@ -8,6 +8,7 @@ use App\Telegram\Middleware\EnsureManagerChat;
 use App\Telegram\Middleware\EnsureUserChat;
 use App\Telegram\Middleware\Manager\EnsureBoss;
 use App\Telegram\Middleware\User\ClearBotHistory;
+use App\Telegram\Middleware\User\EnsureNoRepeatedCancellations;
 use App\Telegram\Middleware\User\SaveLastUserMessageId;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
@@ -62,6 +63,7 @@ $bot->group(function (Nutgram $bot) {
 
 
     $bot->onText('Купить BTC', Conversations\User\BtcConversation::class)
+        ->middleware(EnsureNoRepeatedCancellations::class)
         ->middleware(EnsureActiveRequsiteExists::class)
         ->middleware(EnsureNoActiveOrder::class);
     $bot->onText('Профиль', ProfileHandler::class);
