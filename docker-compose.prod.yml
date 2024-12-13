@@ -16,7 +16,9 @@ services:
       - lilbitex_network
   app:
     container_name: lilbitex_app
-    build: ./_docker/php
+    build:
+      context: ./_docker/php
+      dockerfile: Dockerfile.prod
     volumes:
       - ./:/var/www
     restart: unless-stopped
