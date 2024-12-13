@@ -28,13 +28,13 @@ class StartCommand extends Command
         }
 
         $bot->sendMessageWithSaveId(
-            text: "Hello world",
+            text: "Добро пожаловать в lilbitex",
             reply_markup: ReplyKeyboardMarkup::make(
                 resize_keyboard: true,
                 one_time_keyboard: false,
             )
                 ->addRow(KeyboardButton::make(__('commands.start.menu.buy.btc')))
-                ->addRow(KeyboardButton::make('Продать бит/поддержка'))
+                ->addRow(KeyboardButton::make('Наш менеджер'))
                 ->addRow(
                     KeyboardButton::make(__('commands.start.menu.profile')),
                     KeyboardButton::make(__('commands.start.menu.info'))

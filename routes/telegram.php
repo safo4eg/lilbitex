@@ -18,6 +18,7 @@ use \App\Telegram\Handlers\Manager\CancelOrderHandler;
 use \App\Telegram\Middleware\User\EnsureUserNotBanned;
 use \App\Telegram\Handlers\User\ProfileHandler;
 use \App\Telegram\Handlers\User\BuyBitcoinOrSupportHandler;
+use \App\Telegram\Conversations\Manager\NotifyMenu;
 use Illuminate\Support\Facades\Log;
 
 Conversation::refreshOnDeserialize();
@@ -37,6 +38,9 @@ $bot->group(function (Nutgram $bot) {
 
     $bot->onCommand('user {id}', Conversations\Manager\UserMenu::class)
         ->whereNumber('id')
+        ->skipGlobalMiddlewares();
+
+    $bot->onCommand('notify', NotifyMenu::class)
         ->skipGlobalMiddlewares();
 
     // обработка кнопки "Отправить биток"
@@ -61,12 +65,12 @@ $bot->group(function (Nutgram $bot) {
         ->middleware(EnsureActiveRequsiteExists::class)
         ->middleware(EnsureNoActiveOrder::class);
     $bot->onText('Профиль', ProfileHandler::class);
-    $bot->onText('Продать бит/поддержка', BuyBitcoinOrSupportHandler::class);
+    $bot->onText('Наш менеджер', BuyBitcoinOrSupportHandler::class);
 
     $bot->onCallbackQueryData('command:start', StartCommand::class);
 
     // дл логирования сообщений пользователя
-    $bot->onMessage(function (Nutgram $bot) {});
+    $bot->onMessage(StartCommand::class);
 })
     ->middleware(EnsureUserChat::class)
     ->middleware(ClearBotHistory::class)

@@ -299,6 +299,7 @@ class BtcConversation extends Conversation
             userId: $bot->userId(),
             chatId: $bot->chatId(),
         );
-        VerifyOrderTimeoutJob::dispatch($order);
+        VerifyOrderTimeoutJob::dispatch($order)
+            ->onQueue('orders');
     }
 }
