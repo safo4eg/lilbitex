@@ -76,7 +76,7 @@ class BtcConversation extends Conversation
         $this->next('handleWalletType');
     }
 
-    public function handleWalletType(Nutgram $bot)
+    public function handleWalletType(Nutgram $bot): void
     {
         if(!$bot->isCallbackQuery()) {
             $this->requestWalletType($bot);
@@ -102,6 +102,7 @@ class BtcConversation extends Conversation
         }
 
         $this->requestAmount($bot);
+        $bot->answerCallbackQuery();
     }
 
     public function requestAmount(Nutgram $bot)
