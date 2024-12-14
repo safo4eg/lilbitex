@@ -60,6 +60,8 @@ class PendingExchangeOrderMenu extends InlineMenuWithSaveMessageId
         $order = Order::find($this->order_id);
 
         if($order->status === StatusEnum::COMPLETED->value) {
+            BotService::clearBotHistory($bot, $bot->userId());
+            
             CompletedOrderMenu::begin(
                 bot: $bot,
                 userId: $bot->userId(),

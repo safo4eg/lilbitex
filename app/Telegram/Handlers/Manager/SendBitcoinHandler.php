@@ -23,6 +23,7 @@ class SendBitcoinHandler
         $order = Order::find($orderId);
 
         if($typeValue === BitcoinSendReasonEnum::CHECK_PAYMENT_AND_SEND_BITCOIN->value) {
+            // подтверждение отправк
             $viewData = [
                 'createdAt' => $order->created_at,
                 'sumToPay' => $order->sum_to_pay
