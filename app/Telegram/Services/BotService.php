@@ -76,10 +76,10 @@ class BotService
                 chat_id: $chatId,
                 message_ids: $deletableMessageIds
             );
-        }
 
-        $bot->setUserData('user.message_ids', null, $chatId);
-        $bot->setUserData('bot.message_ids', null, $chatId);
+            $bot->setUserData('user.message_ids', null, $chatId);
+            $bot->setUserData('bot.message_ids', null, $chatId);
+        }
 //        BotService::deleteUserMessages($bot, $chatId);
 //        BotService::deleteBotMessages($bot, $chatId);
     }

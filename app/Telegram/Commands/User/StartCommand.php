@@ -31,7 +31,7 @@ class StartCommand extends Command
             text: "Добро пожаловать в lilbitex",
             reply_markup: ReplyKeyboardMarkup::make(
                 resize_keyboard: true,
-                one_time_keyboard: false,
+                one_time_keyboard: true,
             )
                 ->addRow(KeyboardButton::make(__('commands.start.menu.buy.btc')))
                 ->addRow(
