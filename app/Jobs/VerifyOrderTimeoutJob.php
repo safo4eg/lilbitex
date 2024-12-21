@@ -45,12 +45,13 @@ class VerifyOrderTimeoutJob implements ShouldQueue
                     'cancellation_reason' => CancellationReasonEnum::SYSTEM->value
                 ]);
 
-                BotService::clearBotHistory($bot, $this->order->user->chat_id);
                 CancelledOrderMenu::begin(
                     bot: $bot,
                     userId: $this->order->user->chat_id,
                     chatId: $this->order->user->chat_id
                 );
+
+                BotService::clearBotHistory($bot, $this->order->user->chat_id);
             } else {
                 throw new SilentVerifyOrderTimeoutJobException('Счет еще можно оплатить...');
             }

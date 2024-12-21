@@ -38,12 +38,13 @@ class BankNotificationController extends Controller
             $bot = app(Nutgram::class);
 
             // отправка меню пользователю
-            BotService::clearBotHistory($bot, $order->user->chat_id);
             PendingExchangeOrderMenu::begin(
                 bot: $bot,
                 userId: $order->user->chat_id,
                 chatId: $order->user->chat_id
             );
+
+            BotService::clearBotHistory($bot, $order->user->chat_id);
 
             $BTCService->sendBitcoin($order);
 

@@ -15,11 +15,9 @@ use App\Telegram\Conversations\InlineMenuWithSaveMessageId;
 use App\Telegram\Services\BotService;
 use App\Telegram\Services\ManagerService;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
-use function Laravel\Prompts\text;
 
 class CancelledOrderMenu extends InlineMenuWithSaveMessageId
 {
@@ -84,12 +82,13 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
         );
 
         // удаляем не через end, тк на стороне сервака запускаем InlineMenu
-        BotService::clearBotHistory($bot, $bot->userId());
         PendingExchangeOrderMenu::begin(
             bot: $bot,
             userId: $bot->userId(),
             chatId: $bot->userId()
         );
+
+        BotService::clearBotHistory($bot, $bot->userId());
     }
 
     // будет вызываться если не нажата кнопка

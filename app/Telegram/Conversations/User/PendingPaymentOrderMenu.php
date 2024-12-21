@@ -60,12 +60,13 @@ class PendingPaymentOrderMenu extends InlineMenuWithSaveMessageId
                 'cancellation_reason' => CancellationReasonEnum::USER->value
             ]);
 
-        BotService::clearBotHistory($bot, $bot->userId());
         CancelledOrderMenu::begin(
             bot: $bot,
             userId: $bot->userId(),
             chatId: $bot->userId()
         );
+
+        BotService::clearBotHistory($bot, $bot->userId());
     }
 
     // будет вызываться если не нажата кнопка

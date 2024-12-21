@@ -294,12 +294,14 @@ class BtcConversation extends Conversation
         }
 
         $this->end();
-        BotService::clearBotHistory($bot, $bot->userId());
         PendingPaymentOrderMenu::begin(
             bot: $bot,
             userId: $bot->userId(),
             chatId: $bot->chatId(),
         );
+
+        BotService::clearBotHistory($bot, $bot->userId());
+
         VerifyOrderTimeoutJob::dispatch($order)
             ->onQueue('orders');
     }
