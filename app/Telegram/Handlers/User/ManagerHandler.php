@@ -7,12 +7,12 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class BuyBitcoinOrSupportHandler
+class ManagerHandler
 {
     public function __invoke(Nutgram $bot): void
     {
         $bot->sendMessageWithSaveId(
-            text: view('telegram.user.handlers.our-manager'),
+            text: view('telegram.user.handlers.manager'),
             chat_id: $bot->userId(),
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(InlineKeyboardButton::make(

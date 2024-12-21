@@ -34,7 +34,10 @@ class StartCommand extends Command
                 one_time_keyboard: false,
             )
                 ->addRow(KeyboardButton::make(__('commands.start.menu.buy.btc')))
-                ->addRow(KeyboardButton::make('Наш менеджер'))
+                ->addRow(
+                    KeyboardButton::make('Наш менеджер'),
+                    KeyboardButton::make('Продать сделку')
+                )
                 ->addRow(
                     KeyboardButton::make(__('commands.start.menu.profile')),
                     KeyboardButton::make(__('commands.start.menu.info'))

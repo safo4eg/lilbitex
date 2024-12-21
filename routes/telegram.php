@@ -18,7 +18,8 @@ use \App\Telegram\Handlers\Manager\SendBitcoinHandler;
 use \App\Telegram\Handlers\Manager\CancelOrderHandler;
 use \App\Telegram\Middleware\User\EnsureUserNotBanned;
 use \App\Telegram\Handlers\User\ProfileHandler;
-use \App\Telegram\Handlers\User\BuyBitcoinOrSupportHandler;
+use \App\Telegram\Handlers\User\ManagerHandler;
+use \App\Telegram\Handlers\User\SellDealHandler;
 use \App\Telegram\Conversations\Manager\NotifyMenu;
 use \App\Telegram\Handlers\User\InfoHandler;
 use Illuminate\Support\Facades\Log;
@@ -68,7 +69,8 @@ $bot->group(function (Nutgram $bot) {
         ->middleware(EnsureActiveRequsiteExists::class)
         ->middleware(EnsureNoActiveOrder::class);
     $bot->onText('Профиль', ProfileHandler::class);
-    $bot->onText('Наш менеджер', BuyBitcoinOrSupportHandler::class);
+    $bot->onText('Наш менеджер', ManagerHandler::class);
+    $bot->onText('Продать сделку', SellDealHandler::class);
     $bot->onText('Инфо', InfoHandler::class);
 
     $bot->onCallbackQueryData('command:start', StartCommand::class);
