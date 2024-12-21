@@ -22,7 +22,8 @@ use \App\Telegram\Handlers\User\ManagerHandler;
 use \App\Telegram\Handlers\User\SellDealHandler;
 use \App\Telegram\Conversations\Manager\NotifyMenu;
 use \App\Telegram\Handlers\User\InfoHandler;
-use Illuminate\Support\Facades\Log;
+use \Illuminate\Support\Facades\App;
+use \Illuminate\Contracts\Debug\ExceptionHandler;
 
 Conversation::refreshOnDeserialize();
 
@@ -63,7 +64,6 @@ $bot->group(function (Nutgram $bot) {
     $bot->onCommand('start', StartCommand::class);
     $bot->onCommand('order', OrderCommand::class);
 
-
     $bot->onText('Купить BTC', Conversations\User\BtcConversation::class)
         ->middleware(EnsureNoRepeatedCancellations::class)
         ->middleware(EnsureActiveRequsiteExists::class)
@@ -81,3 +81,12 @@ $bot->group(function (Nutgram $bot) {
     ->middleware(EnsureUserChat::class)
     ->middleware(ClearBotHistory::class)
     ->middleware(EnsureUserNotBanned::class);
+
+$bot->onException(function (Nutgram $bot, \Throwable $exception) {
+    $bot->sendMessageWithSaveId(
+        text: 'Произошла непредвиденная ошибка',
+        chat_id: $bot->chatId()
+    );
+
+    App::make(ExceptionHandler::class)->report($exception);
+});
