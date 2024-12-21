@@ -40,7 +40,7 @@ class BotService
     /**
      * Сохранение сообщений бота
      */
-    public static function saveBotLastMessageId(Nutgram $bot, ?int $messageId, int $chatId): void
+    public static function saveBotLastMessageId(Nutgram $bot, int $messageId, int $chatId): void
     {
         $messageIds = $bot->getUserData('bot.message_ids', $chatId);
         $lastMessageId = $bot->getUserData('bot.last_message_id', $chatId);
@@ -66,8 +66,22 @@ class BotService
      */
     public static function clearBotHistory(Nutgram $bot, int $chatId): void
     {
-        BotService::deleteUserMessages($bot, $chatId);
-        BotService::deleteBotMessages($bot, $chatId);
+        $botMessageIds = $bot->getUserData('bot.message_ids', $chatId, []);
+        $userMessageIds = $bot->getUserData('user.message_ids', $chatId, []);
+
+        $deletableMessageIds = array_merge($botMessageIds, $userMessageIds);
+
+        if(!empty($deletableMessageIds)) {
+            $bot->deleteMessages(
+                chat_id: $chatId,
+                message_ids: $deletableMessageIds
+            );
+        }
+
+        $bot->setUserData('user.message_ids', null, $chatId);
+        $bot->setUserData('bot.message_ids', null, $chatId);
+//        BotService::deleteUserMessages($bot, $chatId);
+//        BotService::deleteBotMessages($bot, $chatId);
     }
 
     /**
@@ -77,8 +91,6 @@ class BotService
      */
     private static function deleteBotMessages(Nutgram $bot, int $chatId): void
     {
-        self::saveBotLastMessageId($bot, null, $chatId);
-
         $messageIds = $bot->getUserData('bot.message_ids', $chatId);
 
         if($messageIds) {

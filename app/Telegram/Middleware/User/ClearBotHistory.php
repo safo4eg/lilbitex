@@ -15,8 +15,8 @@ class ClearBotHistory
 {
     public function __invoke(Nutgram $bot, $next): void
     {
-        BotService::clearBotHistory($bot, $bot->userId());
-
         $next($bot);
+
+        BotService::clearBotHistory($bot, $bot->userId());
     }
 }
