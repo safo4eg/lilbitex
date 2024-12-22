@@ -1,6 +1,7 @@
 <?php
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
+use App\Enums\GroupsEnum;
 use App\Telegram\Commands\User\OrderCommand;
 use App\Telegram\Commands\User\StartCommand;
 use App\Telegram\Conversations;
@@ -34,18 +35,22 @@ $bot->middleware(SaveLastUserMessageId::class);
 $bot->group(function (Nutgram $bot) {
     $bot->group(function (Nutgram $bot) {
         $bot->onCommand('setting', Conversations\Manager\ExchangerSettingMenu::class)
-            ->skipGlobalMiddlewares();
+            ->skipGlobalMiddlewares()
+            ->description('Настройки обменника');
     })->middleware(EnsureBoss::class);
 
     $bot->onCommand('requisite', Conversations\Manager\RequisiteMenu::class)
-        ->skipGlobalMiddlewares();
+        ->skipGlobalMiddlewares()
+        ->description('Реквизиты');
 
     $bot->onCommand('user {id}', Conversations\Manager\UserMenu::class)
         ->whereNumber('id')
-        ->skipGlobalMiddlewares();
+        ->skipGlobalMiddlewares()
+        ->description('Найти пользователя по ID');
 
     $bot->onCommand('notify', NotifyMenu::class)
-        ->skipGlobalMiddlewares();
+        ->skipGlobalMiddlewares()
+        ->description('Рассылка');
 
     // обработка кнопки "Отправить биток"
     $bot->onCallbackQueryData('/btc/send/:{orderId}/:{typeValue}', SendBitcoinHandler::class)
@@ -57,12 +62,15 @@ $bot->group(function (Nutgram $bot) {
         ->whereNumber('orderId')
         ->skipGlobalMiddlewares();
 })
-    ->middleware(EnsureManagerChat::class);
+    ->middleware(EnsureManagerChat::class)
+    ->scope(new \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeChat(config("nutgram.config.groups." . GroupsEnum::MANAGER->value)));
 
 // обработка приватных чатов
 $bot->group(function (Nutgram $bot) {
-    $bot->onCommand('start', StartCommand::class);
-    $bot->onCommand('order', OrderCommand::class);
+    $bot->onCommand('start', StartCommand::class)
+        ->description('Главное меню');
+    $bot->onCommand('order', OrderCommand::class)
+        ->description('Последний заказ');
 
     $bot->onText('Купить BTC', Conversations\User\BtcConversation::class)
         ->middleware(EnsureNoRepeatedCancellations::class)
@@ -80,7 +88,8 @@ $bot->group(function (Nutgram $bot) {
 })
     ->middleware(EnsureUserChat::class)
     ->middleware(ClearBotHistory::class)
-    ->middleware(EnsureUserNotBanned::class);
+    ->middleware(EnsureUserNotBanned::class)
+    ->scope(new \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeAllPrivateChats());
 
 $bot->onException(function (Nutgram $bot, \Throwable $exception) {
     $bot->sendMessageWithSaveId(
