@@ -17,7 +17,7 @@ class EnsureUserNotBanned
             ->first();
 
         if ($user && $user->deleted_at) {
-            $bot->sendMessageWithSaveId(
+            $bot->sendMessage(
                 text: view('telegram.user.middleware.blocked-user', ['id' => $user->id]),
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(InlineKeyboardButton::make(

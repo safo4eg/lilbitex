@@ -92,7 +92,7 @@ $bot->group(function (Nutgram $bot) {
     ->scope(new \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeAllPrivateChats());
 
 $bot->onException(function (Nutgram $bot, \Throwable $exception) {
-    $bot->sendMessageWithSaveId(
+    $bot->sendMessage(
         text: 'Произошла непредвиденная ошибка',
         chat_id: $bot->chatId()
     );

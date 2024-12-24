@@ -21,13 +21,13 @@ class EnsureNoActiveOrder
 
             switch ($order->status) {
                 case StatusEnum::PENDING_PAYMENT->value:
-                    $bot->sendMessageWithSaveId(
+                    $bot->sendMessage(
                         text: view('telegram.user.middleware.ensure-no-active-order', $viewData),
                         chat_id: $bot->userId()
                     );
                     return;
                 case StatusEnum::PENDING_EXCHANGE->value:
-                    $bot->sendMessageWithSaveId(
+                    $bot->sendMessage(
                         text: view('telegram.user.middleware.ensure-no-active-order', $viewData),
                         chat_id: $bot->userId()
                     );

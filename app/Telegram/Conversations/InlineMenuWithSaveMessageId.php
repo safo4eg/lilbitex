@@ -14,7 +14,7 @@ abstract class InlineMenuWithSaveMessageId extends InlineMenu
             ? $this->bot->chatId()
             : $this->chatId;
 
-        return $this->bot->sendMessageWithSaveId(...[
+        return $this->bot->sendMessage(...[
             'reply_markup' => $buttons,
             'text' => $text,
             'chat_id' => $chatId,

@@ -15,7 +15,7 @@ class ProfileHandler
         $user = User::where('chat_id', $bot->userId())
             ->first();
 
-        $bot->sendMessageWithSaveId(
+        $bot->sendMessage(
             text: view('telegram.user.profile-handler', ['user' => $user]),
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(BotService::getReturnToMenuButton()),

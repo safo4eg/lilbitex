@@ -27,7 +27,7 @@ class StartCommand extends Command
             ]);
         }
 
-        $bot->sendMessageWithSaveId(
+        $bot->sendMessage(
             text: "Добро пожаловать в lilbitex",
             reply_markup: ReplyKeyboardMarkup::make(
                 resize_keyboard: true,

@@ -11,7 +11,7 @@ class ManagerHandler
 {
     public function __invoke(Nutgram $bot): void
     {
-        $bot->sendMessageWithSaveId(
+        $bot->sendMessage(
             text: view('telegram.user.handlers.manager'),
             chat_id: $bot->userId(),
             reply_markup: InlineKeyboardMarkup::make()

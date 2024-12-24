@@ -15,7 +15,7 @@ class EnsureActiveRequsiteExists
             ->exists();
 
         if(!$isEnabledRequisiteExists) {
-            $bot->sendMessageWithSaveId(
+            $bot->sendMessage(
                 text: 'Покупка временно недоступна по техническим причинам',
                 chat_id: $bot->userId()
             );

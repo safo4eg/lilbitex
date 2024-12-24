@@ -11,7 +11,7 @@ class InfoHandler
 {
     public function __invoke(Nutgram $bot): void
     {
-        $bot->sendMessageWithSaveId(
+        $bot->sendMessage(
             text: view('telegram.user.handlers.info'),
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(InlineKeyboardButton::make(

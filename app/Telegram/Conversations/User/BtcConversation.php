@@ -67,7 +67,7 @@ class BtcConversation extends Conversation
         }
         $inlineKeyboardMarkup->addRow(BotService::getReturnToMenuButton());
 
-        $bot->sendMessageWithSaveId(
+        $bot->sendMessage(
             text: 'Выберите кошелёк куда будем пополнять:',
             reply_markup: $inlineKeyboardMarkup,
             chat_id: $bot->chatId()
@@ -88,7 +88,7 @@ class BtcConversation extends Conversation
         switch ($walletType) {
             case WalletTypeEnum::BIGMAFIA->value:
                 // получаем настройки для работы с BMB
-                $bot->sendMessageWithSaveId(
+                $bot->sendMessage(
                     text: 'пока недоступно, выберите внешний кошелек',
                     chat_id: $bot->chatId()
                 );
@@ -120,7 +120,7 @@ class BtcConversation extends Conversation
             'rate' => $rate
         ];
 
-        $bot->sendMessageWithSaveId(
+        $bot->sendMessage(
             text: view('telegram.user.amount', $viewData),
             parse_mode: ParseMode::HTML,
             chat_id: $bot->chatId(),
@@ -141,7 +141,7 @@ class BtcConversation extends Conversation
 
         // если не прошла валидация формата суммы
         if($amountSatoshi === null) {
-            $this->bot->sendMessageWithSaveId(
+            $this->bot->sendMessage(
                 text: 'Некорректный формат суммы, повтрите попытку.',
                 chat_id: $bot->chatId()
             );
@@ -149,13 +149,13 @@ class BtcConversation extends Conversation
         }
 
         if((int)$amountSatoshi < $setting->min_amount_satoshi) {
-            $this->bot->sendMessageWithSaveId(
+            $this->bot->sendMessage(
                 text: 'Введённая сумма меньше минимальной.',
                 chat_id: $bot->chatId()
             );
             return;
         } else if((int)$amountSatoshi > $setting->max_amount_satoshi) {
-            $this->bot->sendMessageWithSaveId(
+            $this->bot->sendMessage(
                 text: 'Введённая сумма больше максимальной. Напишите менеджеру.',
                 chat_id: $bot->chatId(),
                 reply_markup: InlineKeyboardMarkup::make()
@@ -169,7 +169,7 @@ class BtcConversation extends Conversation
 
         // подсчет суммы для отправки
         if(!$this->exchanger_setting_service->updateNetworkFee($setting)) {
-            $this->bot->sendMessageWithSaveId(
+            $this->bot->sendMessage(
                 text: 'Произошла ошибка, введите сумму еще раз.',
                 chat_id: $bot->chatId()
             );
@@ -193,7 +193,7 @@ class BtcConversation extends Conversation
         $compareResult = bccomp((int) $amountSatoshi + $setting->network_fee, $setting->balance);
 
         if($compareResult !== -1) {
-            $this->bot->sendMessageWithSaveId(
+            $this->bot->sendMessage(
                 text: 'Введённая сумма с учетом комиссии превышает резерв обменника. Попробуйте позже.',
                 chat_id: $bot->chatId()
             );
@@ -225,7 +225,7 @@ class BtcConversation extends Conversation
             'exchangerFeeRUB' => BTCHelper::convertSatoshiToRub($exchangerFeeSatoshi, $setting->rate)
         ]);
 
-        $bot->sendMessageWithSaveId(
+        $bot->sendMessage(
             text: $message,
             parse_mode: ParseMode::HTML,
             chat_id: $bot->chatId(),
@@ -240,7 +240,7 @@ class BtcConversation extends Conversation
         $walletAddress = $bot->message()->text;
 
         if(!$walletAddress) {
-            $bot->sendMessageWithSaveId(
+            $bot->sendMessage(
                 text: 'Вам нужно ввести адрес своего BTC-адрес.',
                 chat_id: $bot->chatId()
             );
@@ -248,7 +248,7 @@ class BtcConversation extends Conversation
         }
 
         if(!$this->mempool_space_service->validateAddress($walletAddress)) {
-            $bot->sendMessageWithSaveId(
+            $bot->sendMessage(
                 text: 'Произошла ошибка при проверке адреса, введите свой BTC-адрес еще раз.',
                 chat_id: $bot->chatId()
             );
@@ -286,7 +286,7 @@ class BtcConversation extends Conversation
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $bot->sendMessageWithSaveId(
+            $bot->sendMessage(
                 text: 'Что-то пошло не так, повторите последний шаг еще раз.',
                 chat_id: $bot->chatId()
             );

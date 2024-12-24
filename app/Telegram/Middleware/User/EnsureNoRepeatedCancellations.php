@@ -32,7 +32,7 @@ class EnsureNoRepeatedCancellations
 
             $user->update(['deleted_at' => Carbon::now()]);
 
-            $bot->sendMessageWithSaveId(
+            $bot->sendMessage(
                 text: view('telegram.user.middleware.blocked-user', ['id' => $user->id]),
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(InlineKeyboardButton::make(
