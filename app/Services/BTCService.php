@@ -133,8 +133,8 @@ final class BTCService
                 throw new \Exception('Сумма выбранных UTXO-входов меньше чем сумма получения с комиссей.');
             }
 
-            $network = NetworkFactory::bitcoinTestnet(); // Для Testnet
-            // $network = NetworkFactory::bitcoin(); // Для Mainnet
+//            $network = NetworkFactory::bitcoinTestnet(); // Для Testnet
+             $network = NetworkFactory::bitcoin(); // Для Mainnet
             $privateKeyFactory = new PrivateKeyFactory();
             $privateKey = $privateKeyFactory->fromWif($this->exchanger_btc_private_key, $network);
             $addressCreator = new AddressCreator();
