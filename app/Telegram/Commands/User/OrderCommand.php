@@ -16,8 +16,6 @@ class OrderCommand extends Command
 {
     protected string $command = 'order';
 
-    protected ?string $description = 'открытый счет';
-
     public function handle(Nutgram $bot): void
     {
         $order = Order::whereHas('user', function ($query) use($bot) {
@@ -25,6 +23,14 @@ class OrderCommand extends Command
         })
             ->latest()
             ->first();
+
+//        if($order === null) {
+//            $bot->sendMessageWithSaveId(
+//                text: 'К сожалению у вас еще нет заказов',
+//
+//            );
+//            return;
+//        }
 
         switch ($order->status) {
             case StatusEnum::PENDING_PAYMENT->value:

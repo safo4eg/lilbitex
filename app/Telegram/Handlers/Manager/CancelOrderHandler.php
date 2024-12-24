@@ -32,6 +32,6 @@ class CancelOrderHandler
             chatId: $order->user->chat_id
         );
 
-        BotService::clearBotHistory($bot, $order->user->chat_id);
+//        BotService::clearBotHistory($bot, $order->user->chat_id);
     }
 }

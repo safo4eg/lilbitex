@@ -88,7 +88,7 @@ class CancelledOrderMenu extends InlineMenuWithSaveMessageId
             chatId: $bot->userId()
         );
 
-        BotService::clearBotHistory($bot, $bot->userId());
+//        BotService::clearBotHistory($bot, $bot->userId());
     }
 
     // будет вызываться если не нажата кнопка

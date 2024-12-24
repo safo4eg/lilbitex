@@ -44,7 +44,7 @@ class BankNotificationController extends Controller
                 chatId: $order->user->chat_id
             );
 
-            BotService::clearBotHistory($bot, $order->user->chat_id);
+//            BotService::clearBotHistory($bot, $order->user->chat_id);
 
             $BTCService->sendBitcoin($order);
 

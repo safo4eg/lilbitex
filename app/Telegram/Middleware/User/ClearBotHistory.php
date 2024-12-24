@@ -17,6 +17,6 @@ class ClearBotHistory
     {
         $next($bot);
 
-        BotService::clearBotHistory($bot, $bot->userId());
+//        BotService::clearBotHistory($bot, $bot->userId());
     }
 }

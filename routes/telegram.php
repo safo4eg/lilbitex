@@ -29,7 +29,7 @@ use \Illuminate\Contracts\Debug\ExceptionHandler;
 Conversation::refreshOnDeserialize();
 
 // глобальные middleware
-$bot->middleware(SaveLastUserMessageId::class);
+//$bot->middleware(SaveLastUserMessageId::class);
 
 // обработка групповых чатов
 $bot->group(function (Nutgram $bot) {
@@ -87,7 +87,7 @@ $bot->group(function (Nutgram $bot) {
     $bot->onMessage(StartCommand::class);
 })
     ->middleware(EnsureUserChat::class)
-    ->middleware(ClearBotHistory::class)
+//    ->middleware(ClearBotHistory::class)
     ->middleware(EnsureUserNotBanned::class)
     ->scope(new \SergiX44\Nutgram\Telegram\Types\Command\BotCommandScopeAllPrivateChats());
 

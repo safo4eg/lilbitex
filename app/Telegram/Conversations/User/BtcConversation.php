@@ -300,7 +300,7 @@ class BtcConversation extends Conversation
             chatId: $bot->chatId(),
         );
 
-        BotService::clearBotHistory($bot, $bot->userId());
+//        BotService::clearBotHistory($bot, $bot->userId());
 
         VerifyOrderTimeoutJob::dispatch($order)
             ->onQueue('orders');

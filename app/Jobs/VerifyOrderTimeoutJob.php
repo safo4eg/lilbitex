@@ -51,7 +51,7 @@ class VerifyOrderTimeoutJob implements ShouldQueue
                     chatId: $this->order->user->chat_id
                 );
 
-                BotService::clearBotHistory($bot, $this->order->user->chat_id);
+//                BotService::clearBotHistory($bot, $this->order->user->chat_id);
             } else {
                 throw new SilentVerifyOrderTimeoutJobException('Счет еще можно оплатить...');
             }
