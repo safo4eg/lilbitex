@@ -9,8 +9,10 @@ use App\Telegram\Conversations\User\CancelledOrderMenu;
 use App\Telegram\Conversations\User\CompletedOrderMenu;
 use App\Telegram\Conversations\User\PendingExchangeOrderMenu;
 use App\Telegram\Conversations\User\PendingPaymentOrderMenu;
+use App\Telegram\Services\BotService;
 use SergiX44\Nutgram\Handlers\Type\Command;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 class OrderCommand extends Command
 {
@@ -24,13 +26,14 @@ class OrderCommand extends Command
             ->latest()
             ->first();
 
-//        if($order === null) {
-//            $bot->sendMessageWithSaveId(
-//                text: 'К сожалению у вас еще нет заказов',
-//
-//            );
-//            return;
-//        }
+        if($order === null) {
+            $bot->sendMessage(
+                text: 'К сожалению у вас еще нет заявок на обмен',
+                reply_markup: InlineKeyboardMarkup::make()
+                    ->addRow(BotService::getReturnToMenuButton())
+            );
+            return;
+        }
 
         switch ($order->status) {
             case StatusEnum::PENDING_PAYMENT->value:
