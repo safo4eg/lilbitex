@@ -33,7 +33,7 @@ class EnsureNoRepeatedCancellations
             $user->update(['deleted_at' => Carbon::now()]);
 
             $bot->sendMessage(
-                text: view('telegram.user.middleware.blocked-user', ['id' => $user->id]),
+                text: view('telegram.user.middleware.blocked-user', ['chatId' => $user->chat_id]),
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(InlineKeyboardButton::make(
                         text: 'Написать менеджеру',

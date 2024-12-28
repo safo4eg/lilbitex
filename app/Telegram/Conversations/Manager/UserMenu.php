@@ -20,7 +20,7 @@ class UserMenu extends InlineMenu
 
     public bool $is_banned;
 
-    public function start(Nutgram $bot, int $id): void
+    public function start(Nutgram $bot, int $chat_id): void
     {
         $user = User::withTrashed()
             ->withSum(['orders as total_amount' => function ($query) {
@@ -29,7 +29,8 @@ class UserMenu extends InlineMenu
             ->withCount(['orders as completed_orders_count' => function ($query) {
                 $query->where('status', StatusEnum::COMPLETED->value);
             }])
-            ->find($id);
+            ->where('chat_id', $chat_id)
+            ->first();
 
         if(!$user) {
             $bot->sendMessage(text: 'Пользователя с таким ID не существует');

@@ -1,1 +1,1 @@
-USER ID {{ $id }} Вы в блоке
+USER ID {{ $chatId }} Вы в блоке

@@ -43,7 +43,7 @@ $bot->group(function (Nutgram $bot) {
         ->skipGlobalMiddlewares()
         ->description('Реквизиты');
 
-    $bot->onCommand('user {id}', Conversations\Manager\UserMenu::class)
+    $bot->onCommand('user {chat_id}', Conversations\Manager\UserMenu::class)
         ->whereNumber('id')
         ->skipGlobalMiddlewares()
         ->description('Найти пользователя по ID');
