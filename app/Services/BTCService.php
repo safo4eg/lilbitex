@@ -10,11 +10,13 @@ use App\Services\API\BlockStreamAPIService;
 use App\Services\API\MempoolSpaceAPIService;
 use App\Telegram\Services\ManagerService;
 use BitWasp\Bitcoin\Address\AddressCreator;
+use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
 use BitWasp\Bitcoin\Key\Factory\PrivateKeyFactory;
 use BitWasp\Bitcoin\Network\NetworkFactory;
 use BitWasp\Bitcoin\Script\ScriptFactory;
 use BitWasp\Bitcoin\Transaction\TransactionFactory;
 use BitWasp\Bitcoin\Transaction\TransactionOutput;
+use BitWasp\Buffertools\Buffer;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use BitWasp\Bitcoin\Transaction\Factory\Signer;
@@ -156,7 +158,7 @@ final class BTCService
             foreach ($selectedUtxos as $index => $utxo) {
                 $txOut = new TransactionOutput(
                     $utxo['value'],
-                    ScriptFactory::scriptPubKey()->payToPubKeyHash($privateKey->getPubKeyHash())
+                    ScriptFactory::scriptPubKey()->p2wkh($privateKey->getPubKeyHash())
                 );
                 $input = $signer->input($index, $txOut);
                 $input->sign($privateKey);

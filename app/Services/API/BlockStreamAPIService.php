@@ -103,7 +103,7 @@ final class BlockStreamAPIService
                 throw new \Exception("Error broadcasting transaction: " . $response->body());
             }
         } catch (\Exception $e) {
-            Log::channel('single')->debug($e->getMessage());
+            Log::channel('single')->debug($e);
             return -1;
         }
     }
